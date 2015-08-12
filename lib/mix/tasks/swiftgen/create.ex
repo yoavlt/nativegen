@@ -17,6 +17,9 @@ defmodule Mix.Tasks.Swiftgen.Create do
     mix swiftgen.create /path/to/your/directory User users username:string group:Group items:array:Item
   """
 
+  @swift_types ["String", "Bool", "Int", "Float", "Double", "NSDate"]
+  @default_types [:string, :text, :uuid, :boolean, :integer, :float, :double, :decimal, :date, :datetime]
+
   def run(args) do
     [path, singular, plural | params] = args
 
@@ -26,22 +29,18 @@ defmodule Mix.Tasks.Swiftgen.Create do
     parsed = parse_params(params)
     swift_params = swift_var_type(params)
 
-    json_params = build_json_params(swift_params)
-    create_args = build_create_args(swift_params)
-    update_args = build_update_args(swift_params)
-    json_parser = build_json_parser(parsed)
-    param = generate_params(swift_params)
     group = "api" # TODO: customizable
 
     file_path = target_path(path, singular <> "Repository.swift")
     contents = concrete_repository_template(
       singular: singular,
       plural: plural,
-      json_params: json_params,
-      create_args: create_args,
-      update_args: update_args,
-      json_parser: json_parser,
-      param: param,
+      json_params: build_json_params(parsed),
+      create_args: build_create_args(parsed),
+      update_args: build_update_args(parsed),
+      json_parser: build_json_parser(parsed),
+      param: generate_params(parsed),
+      param_key: String.downcase(singular),
       group: group
     )
 
@@ -51,32 +50,48 @@ defmodule Mix.Tasks.Swiftgen.Create do
   def generate_params(params) do
     params
     |> Enum.reject(fn
-      {"id", _}   -> true
-      {_, _} -> false
+      {_, "id", _}   -> true
+      {:array, _, _} -> true
+      {_, _, _}      -> false
     end)
-    |> Enum.map(fn {var, _} -> "#{var}: #{var}" end)
+    |> Enum.map(fn
+      {atom, var, _} when atom in @default_types -> "#{var}: #{var}"
+      {_, var, _} -> "#{var}_id: #{var}Id"
+    end)
     |> Enum.join(", ")
   end
 
   def build_json_params(params) when is_list(params) do
     params
-    |> Enum.map(fn {variable, type} ->
-      "    " <> json_param(variable, type)
+    |> Enum.map(fn {atom, var, type} ->
+        swift_type = to_swift_type(atom, type)
+        "    " <> json_param(atom, var, swift_type)
     end)
     |> Enum.join("\n")
   end
 
-  def json_param(variable, type) do
+  def json_param(_atom, variable, type) when type in @swift_types do
     "let #{variable}: #{type}"
+  end
+
+  def json_param(:array, variable, type) do
+    "var #{variable}: #{type}"
+  end
+
+  def json_param(_atom, variable, type) do
+    "var #{variable}Id: Int\n    " <>
+    "var #{variable}: #{type}"
   end
 
   def build_json_parser(params) when is_list(params) do
     params
     |> Enum.map(fn
       {:array, variable, type} ->
-        "        #{variable} = " <> json_parser(:array, variable, type)
-      {atom, variable, _} ->
+        json_parser(:array, variable, type)
+      {atom, variable, _} when atom in @default_types ->
         "        #{variable} = " <> json_parser(atom, variable)
+      {atom, variable, _} ->
+        json_parser(atom, variable)
     end)
     |> Enum.join("\n")
   end
@@ -105,18 +120,20 @@ defmodule Mix.Tasks.Swiftgen.Create do
 
   def json_parser(type, variable) when is_atom(type) do
     class_name = type |> Atom.to_string |> String.capitalize
-    "#{class_name}(json: json[\"#{variable}\"]!)"
+    contents = custom_json_parser_template(var: variable, type: class_name)
+    String.slice(contents, 0, String.length(contents)-1)
   end
 
   def json_parser(type, variable) when is_bitstring(type) do
     class_name = type |> String.capitalize
-    "#{class_name}(json: json[\"#{variable}\"]!)"
+    contents = custom_json_parser_template(var: variable, type: class_name)
+    String.slice(contents, 0, String.length(contents)-1)
   end
 
   def json_parser(:array, variable, type) do
-    swift_type = to_swift_type(type)
     type_parser = json_parser(type, "$0")
-    "json[\"#{variable}\"].arrayValue.map { #{type_parser} }"
+    contents = array_json_parser_template(var: variable, type_parser: type_parser)
+    String.slice(contents, 0, String.length(contents)-1)
   end
 
   def json_parse_method(type) do
@@ -126,10 +143,11 @@ defmodule Mix.Tasks.Swiftgen.Create do
   def build_create_args(params) when is_list(params) do
     params
     |> Enum.reject(fn
-      {"id", _} -> true
-      {_, _}    -> false
+      {_, "id", _}   -> true
+      {:array, _, _} -> true
+      {_, _, _}      -> false
     end)
-    |> build_update_args
+    |> default_args
   end
 
   def build_update_args(params) when is_list(params) do
@@ -138,15 +156,37 @@ defmodule Mix.Tasks.Swiftgen.Create do
 
   def default_args(params) when is_list(params) do
     params
-    |> Enum.map(fn {variable, type} ->
-      arg(variable, type)
+    |> Enum.map(fn {atom, var, type} ->
+      swift_type = to_swift_type(atom, type)
+      arg(atom, var, swift_type)
     end)
     |> Enum.join(", ")
   end
 
-  def arg(variable, type) do
+  def arg(_atom, variable, type) when type in @swift_types do
     "#{variable}: #{type}"
   end
+  def arg(:array, variable, type) do
+    "#{variable}: #{type}"
+  end
+  def arg(atom, variable, type) do
+    "#{variable}Id: Int"
+  end
+
+  embed_template :custom_json_parser, """
+          if let <%= @var %>IdJson = json["<%= @var %>_id"] {
+              <%= @var %>_id = json["<%= @var %>_id"].intValue
+          }
+          if let <%= @var %>Json = json["<%= @var %>"] {
+              <%= @var %> = <%= @type %>(json: <%= @var %>Json)
+          }
+  """
+
+  embed_template :array_json_parser, """
+          if let <%= @var %>Json = json["<%= @var %>"] {
+              <%= @var %> = <%= @var %>Json.arrayValue.map { <%= @type_parser %> }
+          }
+  """
 
   embed_template :concrete_repository, """
   import Foundation
@@ -164,7 +204,7 @@ defmodule Mix.Tasks.Swiftgen.Create do
   public class <%= @singular %>Repository : Repository {
 
       public func create(<%= @create_args %>) -> Future<<%= @singular %>, NSError> {
-          return requestData(.POST, routes: "/<%= @group %>/<%= @plural %>", param: [<%= @param %>])
+          return requestData(.POST, routes: "/<%= @group %>/<%= @plural %>", param: ["<%= @param_key %>": [<%= @param %>]])
       }
 
       public func show(id: Int) -> Future<<%= @singular %>, NSError> {
@@ -172,7 +212,7 @@ defmodule Mix.Tasks.Swiftgen.Create do
       }
 
       public func update(<%= @update_args %>) -> Future<<%= @singular %>, NSError> {
-          return requestData(.PATCH, routes: "/<%= @group %>/<%= @plural %>/\(id)", param: [<%= @param %>])
+          return requestData(.PATCH, routes: "/<%= @group %>/<%= @plural %>/\(id)", param: ["<%= @param_key %>": [<%= @param %>]])
       }
 
       public func delete(id: Int) -> Future<Bool, NSError> {

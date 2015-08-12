@@ -31,17 +31,16 @@ defmodule Mix.Swiftgen do
   def swift_var_type(params) when is_list(params) do
     parse_params(params)
     |> Enum.map(fn
-      {:array, variable, type} ->
-        {variable, "[#{to_swift_type(type)}]"}
-      {type, variable, _} ->
-        {variable, to_swift_type(type)}
+      {atom, var, type} ->
+        {var, to_swift_type(atom, type)}
     end)
   end
 
   @doc """
   Parse parameter to Swift's type
   """
-  def to_swift_type(type) when is_atom(type) do
+  def to_swift_type(type, sub_type \\ "")
+  def to_swift_type(type, sub_type) when is_atom(type) do
     case type do
       :string   -> "String"
       :text     -> "String"
@@ -53,6 +52,7 @@ defmodule Mix.Swiftgen do
       :decimal  -> "Double"
       :date     -> "NSDate"
       :datetime -> "NSDate"
+      :array    -> "[#{to_swift_type(sub_type)}]"
       custom    ->
         custom
         |> Atom.to_string
@@ -60,7 +60,7 @@ defmodule Mix.Swiftgen do
     end
   end
 
-  def to_swift_type(type) when is_bitstring(type) do
+  def to_swift_type(type, sub_type) when is_bitstring(type) do
     String.capitalize(type)
   end
 

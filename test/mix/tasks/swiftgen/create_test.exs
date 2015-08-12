@@ -6,32 +6,33 @@ defmodule Swiftgen.CreateTest do
   @valid_params ["id:integer", "username:string", "age:integer", "group:Group", "items:array:Item"]
 
   test "build json params" do
-    params = Mix.Swiftgen.swift_var_type(@valid_params)
+    params = Mix.Swiftgen.parse_params(@valid_params)
     assert build_json_params(params) <> "\n" == ~S"""
         let id: Int
         let username: String
         let age: Int
-        let group: Group
-        let items: [Item]
+        var groupId: Int
+        var group: Group
+        var items: [Item]
     """
   end
 
   test "default args" do
-    params = Mix.Swiftgen.swift_var_type(@valid_params)
+    params = Mix.Swiftgen.parse_params(@valid_params)
     args = default_args(params)
-    assert args == "id: Int, username: String, age: Int, group: Group, items: [Item]"
+    assert args == "id: Int, username: String, age: Int, groupId: Int, items: [Item]"
   end
 
   test "build create args" do
-    params = Mix.Swiftgen.swift_var_type(@valid_params)
+    params = Mix.Swiftgen.parse_params(@valid_params)
     args = build_create_args(params)
-    assert args == "username: String, age: Int, group: Group, items: [Item]"
+    assert args == "username: String, age: Int, groupId: Int"
   end
 
   test "build update args" do
-    params = Mix.Swiftgen.swift_var_type(@valid_params)
+    params = Mix.Swiftgen.parse_params(@valid_params)
     args = build_update_args(params)
-    assert args == "id: Int, username: String, age: Int, group: Group, items: [Item]"
+    assert args == "id: Int, username: String, age: Int, groupId: Int, items: [Item]"
   end
 
   test "build json parser" do
@@ -41,15 +42,22 @@ defmodule Swiftgen.CreateTest do
             id = json["id"].intValue
             username = json["username"].stringValue
             age = json["age"].intValue
-            group = Group(json: json["group"]!)
-            items = json["items"].arrayValue.map { Item(json: $0) }
+            if let groupIdJson = json["group_id"] {
+                group_id = json["group_id"].intValue
+            }
+            if let groupJson = json["group"] {
+                group = Group(json: groupJson)
+            }
+            if let itemsJson = json["items"] {
+                items = itemsJson.arrayValue.map { Item(json: $0) }
+            }
     """
   end
 
   test "generate params" do
-    params = Mix.Swiftgen.swift_var_type(@valid_params)
+    params = Mix.Swiftgen.parse_params(@valid_params)
     params = generate_params(params)
-    assert params == "username: username, age: age, group: group, items: items"
+    assert params == "username: username, age: age, group_id: groupId"
   end
 
   test "run" do
