@@ -15,8 +15,8 @@ defmodule Swiftgen.SetupTest do
     assert_raise Mix.Error, fn -> run ["1st", "2nd", "3rd"] end
   end
 
-  test "created directory for 1st argument and generated swift file" do
-    test_directory = Path.join(".", "test_generate_directory")
+  test "created directory specified 1st argument and generated swift file" do
+    test_directory = Path.join(".", "test_generate_directory/repo")
     if File.exists?(test_directory) do
       File.rm_rf(test_directory)
     end
@@ -24,7 +24,7 @@ defmodule Swiftgen.SetupTest do
     run [test_directory, @test_host]
     assert File.exists?(test_directory)
     assert File.exists?(Path.join(test_directory, "repository.swift"))
-    File.rm_rf(test_directory)
+    File.rm_rf(Path.join(".", "test_generate_directory"))
   end
 
 end

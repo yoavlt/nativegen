@@ -1,6 +1,7 @@
 defmodule Mix.Tasks.Swiftgen.Setup do
   use Mix.Task
   import Mix.Generator
+  import Mix.Swiftgen
 
   @shortdoc "Setup swift code base"
 
@@ -25,23 +26,14 @@ defmodule Mix.Tasks.Swiftgen.Setup do
           create_directory(path)
         end
 
-        file_path = repository_path(path)
+        file_path = target_path(path, "repository.swift")
         contents = compile_repository(host)
 
         create_file(file_path, contents)
       _ -> Mix.raise """
-      expected to swiftgen.setup to receive two arguments.
+      expected swiftgen.setup receive two arguments.
       """
     end
-  end
-
-  @doc """
-  target path
-  """
-  def repository_path(specified_path) do
-    specified_path
-    |> Path.expand
-    |> Path.join("repository.swift")
   end
 
   @doc """
@@ -161,6 +153,18 @@ defmodule Mix.Tasks.Swiftgen.Setup do
           }
           return p.future
       }
+
+      func parseDate(year:Int, month:Int, day:Int) -> NSDate {
+          var c = NSDateComponents()
+          c.year = year
+          c.month = month
+          c.day = day
+
+          var gregorian = NSCalendar(identifier:NSGregorianCalendar)
+          var date = gregorian.dateFromComponents(c)
+          return date
+      }
+
   }
   """
 
