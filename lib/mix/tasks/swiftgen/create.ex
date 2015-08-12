@@ -21,15 +21,25 @@ defmodule Mix.Tasks.Swiftgen.Create do
     [path, singular, plural | params] = args
 
     params = ["id:integer" | params]
-    parsed = swift_var_type(params)
+    parsed = parse_params(params)
+    swift_params = swift_var_type(params)
 
-    _json_params = build_json_params(parsed)
-    _create_args = build_create_args(parsed)
-    _update_args = build_update_args(parsed)
-    group = "api" # TODO: customizable
+    _json_params = build_json_params(swift_params)
+    _create_args = build_create_args(swift_params)
+    _update_args = build_update_args(swift_params)
+    _json_parser = build_json_parser(parsed)
+    _params = generate_params(swift_params)
+    _group = "api" # TODO: customizable
   end
 
   def generate_params(params) do
+    params
+    |> Enum.reject(fn
+      {"id", _}   -> true
+      {_, _} -> false
+    end)
+    |> Enum.map(fn {var, _} -> "#{var}: #{var}" end)
+    |> Enum.join(", ")
   end
 
   def build_json_params(params) when is_list(params) do

@@ -46,4 +46,10 @@ defmodule Swiftgen.CreateTest do
     """
   end
 
+  test "generate params" do
+    params = Mix.Swiftgen.swift_var_type(@valid_params)
+    params = generate_params(params)
+    assert params == "username: username, age: age, group: group, items: items"
+  end
+
 end
