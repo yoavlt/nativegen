@@ -19,13 +19,25 @@ defmodule Mix.Tasks.Swiftgen.Create do
 
   def run(args) do
     [path, singular, plural | params] = args
+
+    params = ["id:integer" | params]
+    parsed = swift_var_type(params)
+
+    _json_params = build_json_params(parsed)
+    _create_args = build_create_args(parsed)
+    _update_args = build_update_args(parsed)
+    group = "api" # TODO: customizable
   end
 
   def generate_params(params) do
   end
 
   def build_json_params(params) when is_list(params) do
-
+    params
+    |> Enum.map(fn {variable, type} ->
+      json_param(variable, type)
+    end)
+    |> Enum.join("\n")
   end
 
   def json_param(variable, type) do
@@ -33,17 +45,81 @@ defmodule Mix.Tasks.Swiftgen.Create do
   end
 
   def build_json_parser(params) when is_list(params) do
-    parse_params(params)
-    |> Enum.map(fn [variable, type] ->
-      json_param(variable, type)
+    params
+    |> Enum.map(fn
+      {:array, variable, type} ->
+        "#{variable} = " <> json_parser(:array, variable, type)
+      {atom, variable, _} ->
+        "#{variable} = " <> json_parser(atom, variable)
     end)
     |> Enum.join("\n")
   end
 
+  def json_parser(type, variable) when type in [:string, :text, :uuid, :boolean, :integer, :float, :double, :decimal] do
+    swift_type = to_swift_type(type)
+    "json[\"#{variable}\"].#{json_parse_method(swift_type)}"
+  end
+
+  def json_parser(type, "$0") when type in [:string, :text, :uuid, :boolean, :integer, :float, :double, :decimal] do
+    swift_type = to_swift_type(type)
+    "$0.#{json_parse_method(swift_type)}"
+  end
+
+  def json_parser(type, "$0") when type in [:datetime, :date] do
+    "Repository.parseDate(json: $0)"
+  end
+
+  def json_parser(type, "$0") when is_bitstring(type) do
+    "#{type}(json: $0)"
+  end
+
+  def json_parser(type, variable) when type in [:datetime, :date] do
+    "Repository.parseDate(json[\"#{variable}\"]!)"
+  end
+
+  def json_parser(type, variable) when is_atom(type) do
+    class_name = type |> Atom.to_string |> String.capitalize
+    "#{class_name}(json: json[\"#{variable}\"]!)"
+  end
+
+  def json_parser(type, variable) when is_bitstring(type) do
+    class_name = type |> String.capitalize
+    "#{class_name}(json: json[\"#{variable}\"]!)"
+  end
+
+  def json_parser(:array, variable, type) do
+    swift_type = to_swift_type(type)
+    type_parser = json_parser(type, "$0")
+    "json[\"#{variable}\"].arrayValue.map { #{type_parser} }"
+  end
+
+  def json_parse_method(type) do
+    String.downcase(type) <> "Value"
+  end
+
   def build_create_args(params) when is_list(params) do
+    params
+    |> Enum.reject(fn
+      {"id", _} -> true
+      {_, _}    -> false
+    end)
+    |> build_update_args
   end
 
   def build_update_args(params) when is_list(params) do
+    default_args(params)
+  end
+
+  def default_args(params) when is_list(params) do
+    params
+    |> Enum.map(fn {variable, type} ->
+      arg(variable, type)
+    end)
+    |> Enum.join(", ")
+  end
+
+  def arg(variable, type) do
+    "#{variable}: #{type}"
   end
 
   embed_template :concrete_repository, """

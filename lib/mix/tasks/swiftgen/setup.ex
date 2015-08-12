@@ -154,7 +154,7 @@ defmodule Mix.Tasks.Swiftgen.Setup do
           return p.future
       }
 
-      func parseDate(year:Int, month:Int, day:Int) -> NSDate {
+      static func parseDate(year:Int, month:Int, day:Int) -> NSDate {
           var c = NSDateComponents()
           c.year = year
           c.month = month
@@ -163,6 +163,13 @@ defmodule Mix.Tasks.Swiftgen.Setup do
           var gregorian = NSCalendar(identifier:NSGregorianCalendar)
           var date = gregorian.dateFromComponents(c)
           return date
+      }
+
+      static func parseDate(json: JSON) -> NSDate {
+          let year = json["year"].intValue
+          let month = json["month"].intValue
+          let day = json["day"].intValue
+          return parseDate(year, month: month, day: day)
       }
 
   }
