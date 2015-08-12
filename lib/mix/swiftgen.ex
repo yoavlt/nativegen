@@ -11,6 +11,9 @@ defmodule Mix.Swiftgen do
     |> Path.join(file_name)
   end
 
+  @doc """
+  Parse parameter to variable and Swift's type
+  """
   def parse_params(params) when is_list(params) do
     params
     |> Enum.map(&String.split(&1, ":"))
@@ -24,9 +27,15 @@ defmodule Mix.Swiftgen do
     end)
   end
 
+  @doc """
+  Parse parameter to Swift's type
+  """
   def parse_type(type) do
     case type do
       "string"   -> "String"
+      "text"     -> "String"
+      "uuid"     -> "String"
+      "boolean"  -> "Bool"
       "integer"  -> "Int"
       "float"    -> "Float"
       "double"   -> "Double"
