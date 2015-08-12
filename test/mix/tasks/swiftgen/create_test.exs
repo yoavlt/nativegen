@@ -8,11 +8,11 @@ defmodule Swiftgen.CreateTest do
   test "build json params" do
     params = Mix.Swiftgen.swift_var_type(@valid_params)
     assert build_json_params(params) <> "\n" == ~S"""
-    let id: Int
-    let username: String
-    let age: Int
-    let group: Group
-    let items: [Item]
+        let id: Int
+        let username: String
+        let age: Int
+        let group: Group
+        let items: [Item]
     """
   end
 
@@ -38,11 +38,11 @@ defmodule Swiftgen.CreateTest do
     params = Mix.Swiftgen.parse_params(@valid_params)
     parser = build_json_parser(params)
     assert parser <> "\n" == ~S"""
-    id = json["id"].intValue
-    username = json["username"].stringValue
-    age = json["age"].intValue
-    group = Group(json: json["group"]!)
-    items = json["items"].arrayValue.map { Item(json: $0) }
+            id = json["id"].intValue
+            username = json["username"].stringValue
+            age = json["age"].intValue
+            group = Group(json: json["group"]!)
+            items = json["items"].arrayValue.map { Item(json: $0) }
     """
   end
 
@@ -50,6 +50,15 @@ defmodule Swiftgen.CreateTest do
     params = Mix.Swiftgen.swift_var_type(@valid_params)
     params = generate_params(params)
     assert params == "username: username, age: age, group: group, items: items"
+  end
+
+  test "run" do
+    if File.exists?("test_generate_directory") do
+      File.rm_rf("test_generate_directory")
+    end
+    run(["test_generate_directory/test", "User", "users", @valid_params])
+    assert File.exists?("test_generate_directory/test/UserRepository.swift")
+    File.rm_rf("test_generate_directory")
   end
 
 end

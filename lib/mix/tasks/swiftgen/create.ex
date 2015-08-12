@@ -20,16 +20,32 @@ defmodule Mix.Tasks.Swiftgen.Create do
   def run(args) do
     [path, singular, plural | params] = args
 
-    params = ["id:integer" | params]
+    params = ["id:integer"] ++ params
+              |> List.flatten
+              |> Enum.uniq
     parsed = parse_params(params)
     swift_params = swift_var_type(params)
 
-    _json_params = build_json_params(swift_params)
-    _create_args = build_create_args(swift_params)
-    _update_args = build_update_args(swift_params)
-    _json_parser = build_json_parser(parsed)
-    _params = generate_params(swift_params)
-    _group = "api" # TODO: customizable
+    json_params = build_json_params(swift_params)
+    create_args = build_create_args(swift_params)
+    update_args = build_update_args(swift_params)
+    json_parser = build_json_parser(parsed)
+    param = generate_params(swift_params)
+    group = "api" # TODO: customizable
+
+    file_path = target_path(path, singular <> "Repository.swift")
+    contents = concrete_repository_template(
+      singular: singular,
+      plural: plural,
+      json_params: json_params,
+      create_args: create_args,
+      update_args: update_args,
+      json_parser: json_parser,
+      param: param,
+      group: group
+    )
+
+    create_file(file_path, contents)
   end
 
   def generate_params(params) do
@@ -45,7 +61,7 @@ defmodule Mix.Tasks.Swiftgen.Create do
   def build_json_params(params) when is_list(params) do
     params
     |> Enum.map(fn {variable, type} ->
-      json_param(variable, type)
+      "    " <> json_param(variable, type)
     end)
     |> Enum.join("\n")
   end
@@ -58,9 +74,9 @@ defmodule Mix.Tasks.Swiftgen.Create do
     params
     |> Enum.map(fn
       {:array, variable, type} ->
-        "#{variable} = " <> json_parser(:array, variable, type)
+        "        #{variable} = " <> json_parser(:array, variable, type)
       {atom, variable, _} ->
-        "#{variable} = " <> json_parser(atom, variable)
+        "        #{variable} = " <> json_parser(atom, variable)
     end)
     |> Enum.join("\n")
   end
@@ -139,9 +155,9 @@ defmodule Mix.Tasks.Swiftgen.Create do
   import SwiftyJSON
 
   public class <%= @singular %> : JsonModel {
-      <%= @json_params %>
+  <%= @json_params %>
       public required init(json: JSON) {
-          <%= @json_parser %>
+  <%= @json_parser %>
       }
   }
 
