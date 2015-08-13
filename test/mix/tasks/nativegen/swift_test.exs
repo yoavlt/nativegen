@@ -1,7 +1,7 @@
-defmodule Nativegen.SwiftgenTest do
+defmodule Nativegen.SwiftTest do
   use ExUnit.Case
 
-  import Mix.Tasks.Swiftgen
+  import Mix.Tasks.Nativegen.Swift
 
   test "parse params to variable and Swift type" do
     params = swift_var_type(["username:string", "age:integer", "group:Group", "items:array:Item"])

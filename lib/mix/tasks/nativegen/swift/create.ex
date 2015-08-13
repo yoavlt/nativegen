@@ -1,8 +1,8 @@
-defmodule Mix.Tasks.Nativegen.Create do
+defmodule Mix.Tasks.Nativegen.Swift.Create do
   use Mix.Task
   import Mix.Generator
   import Mix.Nativegen
-  import Mix.Tasks.Swiftgen
+  import Mix.Tasks.Nativegen.Swift
 
   @shortdoc "Create specified swift repository code"
 

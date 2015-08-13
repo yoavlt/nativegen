@@ -1,7 +1,7 @@
-defmodule Nativegen.CreateTest do
+defmodule Nativegen.Swift.CreateTest do
   use ExUnit.Case
 
-  import Mix.Tasks.Nativegen.Create
+  import Mix.Tasks.Nativegen.Swift.Create
 
   @valid_params ["id:integer", "username:string", "age:integer", "battle_num:integer", "group:Group", "items:array:Item"]
 

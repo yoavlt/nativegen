@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Nativegen.Setup do
+defmodule Mix.Tasks.Nativegen.Swift.Setup do
   use Mix.Task
   import Mix.Generator
   import Mix.Nativegen

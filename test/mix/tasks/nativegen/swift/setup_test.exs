@@ -1,7 +1,7 @@
-defmodule Nativegen.SetupTest do
+defmodule Nativegen.Swift.SetupTest do
   use ExUnit.Case
 
-  import Mix.Tasks.Nativegen.Setup
+  import Mix.Tasks.Nativegen.Swift.Setup
 
   @test_host "http://yoavlt.com"
 

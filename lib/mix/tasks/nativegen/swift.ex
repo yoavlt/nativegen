@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Swiftgen do
+defmodule Mix.Tasks.Nativegen.Swift do
 
   @moduledoc """
   Handle swift code utilities
