@@ -38,5 +38,24 @@ defmodule Nativegen.Swift.ModelTest do
     """
   end
 
+  test "generate json model" do
+    assert generate_json_model(
+    "User",
+    ["username:string", "age:integer", "first_name:string", "last_name:string"]) === """
+    public class User : JsonModel {
+        let username: String
+        let age: Int
+        let firstName: String
+        let lastName: String
+        public required init(json: JSON) {
+            username = json["username"].stringValue
+            age = json["age"].intValue
+            firstName = json["first_name"].stringValue
+            lastName = json["last_name"].stringValue
+        }
+    }
+    """
+  end
+
 
 end

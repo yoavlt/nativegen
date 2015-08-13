@@ -22,11 +22,10 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
   def run(args) do
     [path, singular, plural | params] = args
 
-    params = ["id:integer"] ++ params
-              |> List.flatten
+    id_params = ["id:integer"] ++ params
               |> Enum.uniq
-    parsed = parse_params(params)
-    swift_params = swift_var_type(params)
+    parsed = parse_params(id_params)
+    swift_params = swift_var_type(id_params)
 
     group = "api" # TODO: customizable
 
@@ -34,7 +33,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
     contents = concrete_repository_template(
       singular: singular,
       plural: plural,
-      json_model: generate_json_model(singular, parsed),
+      json_model: generate_json_model(singular, params),
       create_args: build_create_args(parsed),
       update_args: build_update_args(parsed),
       param: generate_params(parsed),

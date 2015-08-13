@@ -21,7 +21,7 @@ defmodule Nativegen.Swift.CreateTest do
     if File.exists?("test_generate_directory") do
       File.rm_rf("test_generate_directory")
     end
-    run(["test_generate_directory/test", "User", "users", @valid_params])
+    run(["test_generate_directory/test", "User", "users"] ++ @valid_params)
     assert File.exists?("test_generate_directory/test/UserRepository.swift")
     File.rm_rf("test_generate_directory")
   end

@@ -20,11 +20,21 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   def run(args) do
     [singular | params] = args
 
+    content = generate_json_model(singular, params)
+
+    show_on_shell content
+  end
+
+  def show_on_shell(content) do
+    Mix.shell.info """
+    Please add the json model in your iOS project code.
+    """ <> content
   end
 
   def generate_json_model(singular, params) when is_list(params) do
-    json_params = params |> build_json_params
-    json_parser = params |> build_json_parser
+    parsed = parse_params(params)
+    json_params = parsed |> build_json_params
+    json_parser = parsed |> build_json_parser
     json_model_template(
     singular: singular,
     json_params: json_params,
