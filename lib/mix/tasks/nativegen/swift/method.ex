@@ -46,14 +46,18 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     param: param,
     arg: arg,
     response_type: response_type,
+    request_method: request_method(response_type),
     http_method: http_method,
     route: route
     )
   end
 
+  def request_method("Bool"), do: "requestSuccess"
+  def request_method(_), do: "request"
+
   embed_template :method, """
       public func <%= @method_name %>(<%= @arg %>) -> Future<<%= @response_type %>, NSError> {
-          return request(<%= @http_method %>, routes: "<%= @route %>", param: <%= @param %>)
+          return <%= @request_method %>(<%= @http_method %>, routes: "<%= @route %>", param: <%= @param %>)
       }
   """
 

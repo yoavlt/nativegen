@@ -17,4 +17,18 @@ defmodule Nativegen.Swift.MethodTest do
     """
   end
 
+  test "generate requestSuccess method" do
+    assert generate_method(
+    "delete",
+    "/users/delete",
+    "deleteUser",
+    "Bool",
+    ["id:integer"]
+    ) == """
+        public func deleteUser(id: Int) -> Future<Bool, NSError> {
+            return requestSuccess(.DELETE, routes: "/users/delete", param: nil)
+        }
+    """
+  end
+
 end
