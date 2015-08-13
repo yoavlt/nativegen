@@ -6,6 +6,9 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
 
   @shortdoc "Create specified swift repository code"
 
+  @default_types [:string, :text, :uuid, :boolean, :integer, :float, :double, :decimal, :date, :datetime]
+  @swift_types ["String", "Bool", "Int", "Float", "Double", "NSDate"]
+
   @moduledoc """
   Create repository code that contains CRUD methods.
 
@@ -15,11 +18,8 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
   - BrightFutures
 
   ## Example
-    mix nativegen.create /path/to/your/directory User users username:string group:Group items:array:Item
+    mix nativegen.swift.create /path/to/your/directory User users username:string group:Group items:array:Item
   """
-
-  @swift_types ["String", "Bool", "Int", "Float", "Double", "NSDate"]
-  @default_types [:string, :text, :uuid, :boolean, :integer, :float, :double, :decimal, :date, :datetime]
 
   def run(args) do
     [path, singular, plural | params] = args
@@ -46,20 +46,6 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
     )
 
     create_file(file_path, contents)
-  end
-
-  def generate_params(params) do
-    params
-    |> Enum.reject(fn
-      {_, "id", _}   -> true
-      {:array, _, _} -> true
-      {_, _, _}      -> false
-    end)
-    |> Enum.map(fn
-      {atom, var, _} when atom in @default_types -> "#{var}: #{to_camel_case(var)}"
-      {_, var, _} -> "#{var}_id: #{to_camel_case(var)}Id"
-    end)
-    |> Enum.join(", ")
   end
 
   def build_json_params(params) when is_list(params) do

@@ -56,12 +56,6 @@ defmodule Nativegen.Swift.CreateTest do
     """
   end
 
-  test "generate params" do
-    params = Mix.Nativegen.parse_params(@valid_params)
-    params = generate_params(params)
-    assert params == "username: username, age: age, battle_num: battleNum, group_id: groupId"
-  end
-
   test "run" do
     if File.exists?("test_generate_directory") do
       File.rm_rf("test_generate_directory")
