@@ -2,6 +2,7 @@ defmodule Mix.Tasks.Nativegen.Create do
   use Mix.Task
   import Mix.Generator
   import Mix.Nativegen
+  import Mix.Tasks.Swiftgen
 
   @shortdoc "Create specified swift repository code"
 
