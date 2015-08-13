@@ -31,7 +31,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   def show_on_shell(content) do
     Mix.shell.info """
 
-  Please add the method in your iOS project code.
+    Please add the method in your iOS project code.
 
     """ <> content
   end
