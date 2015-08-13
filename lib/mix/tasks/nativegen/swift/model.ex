@@ -28,6 +28,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   def show_on_shell(content) do
     Mix.shell.info """
     Please add the json model in your iOS project code.
+
     """ <> content
   end
 
