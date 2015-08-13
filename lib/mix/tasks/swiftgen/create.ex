@@ -70,14 +70,10 @@ defmodule Mix.Tasks.Swiftgen.Create do
     |> Enum.join("\n")
   end
 
-  def json_param(_atom, variable, type) when type in @swift_types do
-    "let #{variable}: #{type}"
-  end
-
-  def json_param(:array, variable, type) do
-    "var #{variable}: #{type}"
-  end
-
+  def json_param(_atom, variable, type) when type in @swift_types,
+  do: "let #{variable}: #{type}"
+  def json_param(:array, variable, type),
+  do: "var #{variable}: #{type}"
   def json_param(_atom, variable, type) do
     "var #{variable}Id: Int\n    " <>
     "var #{variable}: #{type}"
@@ -106,17 +102,14 @@ defmodule Mix.Tasks.Swiftgen.Create do
     "$0.#{json_parse_method(swift_type)}"
   end
 
-  def json_parser(type, "$0") when type in [:datetime, :date] do
-    "Repository.parseDate(json: $0)"
-  end
+  def json_parser(type, "$0") when type in [:datetime, :date],
+  do: "Repository.parseDate(json: $0)"
 
-  def json_parser(type, "$0") when is_bitstring(type) do
-    "#{type}(json: $0)"
-  end
+  def json_parser(type, "$0") when is_bitstring(type),
+  do: "#{type}(json: $0)"
 
-  def json_parser(type, variable) when type in [:datetime, :date] do
-    "Repository.parseDate(json[\"#{variable}\"]!)"
-  end
+  def json_parser(type, variable) when type in [:datetime, :date],
+  do: "Repository.parseDate(json[\"#{variable}\"]!)"
 
   def json_parser(type, variable) when is_atom(type) do
     class_name = type |> Atom.to_string |> String.capitalize
@@ -136,9 +129,7 @@ defmodule Mix.Tasks.Swiftgen.Create do
     String.slice(contents, 0, String.length(contents)-1)
   end
 
-  def json_parse_method(type) do
-    String.downcase(type) <> "Value"
-  end
+  def json_parse_method(type), do: String.downcase(type) <> "Value"
 
   def build_create_args(params) when is_list(params) do
     params
@@ -163,15 +154,10 @@ defmodule Mix.Tasks.Swiftgen.Create do
     |> Enum.join(", ")
   end
 
-  def arg(_atom, variable, type) when type in @swift_types do
-    "#{variable}: #{type}"
-  end
-  def arg(:array, variable, type) do
-    "#{variable}: #{type}"
-  end
-  def arg(atom, variable, type) do
-    "#{variable}Id: Int"
-  end
+  def arg(_atom, variable, type) when type in @swift_types,
+  do: "#{variable}: #{type}"
+  def arg(:array, variable, type), do: "#{variable}: #{type}"
+  def arg(atom, variable, type), do: "#{variable}Id: Int"
 
   embed_template :custom_json_parser, """
           if let <%= @var %>IdJson = json["<%= @var %>_id"] {
