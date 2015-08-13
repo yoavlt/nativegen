@@ -38,7 +38,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
 
   def generate_method(http_method, route, method_name, response_type, params) when is_list(params) do
     http_method = http_method |> String.to_atom |> to_swift_method
-    param = params |> parse_params |> generate_params
+    param = params |> parse_params |> generate_params |> wrap_array
     arg = params |> parse_params |> default_args
 
     content = method_template(
@@ -53,7 +53,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
 
   embed_template :method, """
       public func <%= @method_name %>(<%= @arg %>) -> Future<<%= @response_type %>, NSError> {
-          return request(<%= @http_method %>, routes: "<%= @route %>", param: [<%= @param %>])
+          return request(<%= @http_method %>, routes: "<%= @route %>", param: <%= @param %>)
       }
   """
 

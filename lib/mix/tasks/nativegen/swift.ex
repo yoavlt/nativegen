@@ -84,4 +84,11 @@ defmodule Mix.Tasks.Nativegen.Swift do
   def arg(:array, variable, type), do: "#{variable}: #{type}"
   def arg(atom, variable, type), do: "#{variable}Id: Int"
 
+  def wrap_array(param_str) do
+    case param_str do
+      ""  -> "nil"
+      par -> "[#{par}]"
+    end
+  end
+
 end
