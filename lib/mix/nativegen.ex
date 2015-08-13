@@ -25,6 +25,9 @@ defmodule Mix.Nativegen do
     end)
   end
 
+  @doc """
+  Transform variable or method to lower camel case.
+  """
   def to_camel_case(word) do
     [head | tail] = word |> String.split("_")
     capitalized = tail
