@@ -7,7 +7,7 @@ defmodule Mix.Tasks.Nativegen.Append do
   Append request method to existing client code.
 
   ## Example
-      mix swiftgen.append /path/to/your/client/path responseMessage post /api/chat/response thread_id:integer message:string
+      mix nativegen.append /path/to/your/client/path responseMessage post /api/chat/response thread_id:integer message:string
 
   The first argument is the path to your client file.
   """

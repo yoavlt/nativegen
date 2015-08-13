@@ -14,7 +14,7 @@ defmodule Mix.Tasks.Nativegen.Setup do
   - BrightFutures
 
   ## Example
-      mix swiftgen.setup /path/to/your/swift/directory http://your_base_url.com
+      mix nativegen.setup /path/to/your/swift/directory http://your_base_url.com
 
   The first argument is the directory which you want to generate code base in your iOS project,
   and second argument is your host URL.
@@ -31,7 +31,7 @@ defmodule Mix.Tasks.Nativegen.Setup do
 
         create_file(file_path, contents)
       _ -> Mix.raise """
-      expected swiftgen.setup receive two arguments.
+      expected nativegen.setup receive two arguments.
       """
     end
   end
