@@ -17,6 +17,26 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   def run(args) do
     [http_method, route, method_name, response_type | params] = args
 
+    content = generate_method(
+      http_method,
+      route,
+      method_name,
+      response_type,
+      params
+    )
+
+    show_on_shell content
+  end
+
+  def show_on_shell(content) do
+    Mix.shell.info """
+
+  Please add the method in your iOS project code.
+
+    """ <> content
+  end
+
+  def generate_method(http_method, route, method_name, response_type, params) when is_list(params) do
     http_method = http_method |> String.to_atom |> to_swift_method
     param = params |> parse_params |> generate_params
     arg = params |> parse_params |> default_args
@@ -29,14 +49,9 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     http_method: http_method,
     route: route
     )
-
-    Mix.shell.info content
   end
 
   embed_template :method, """
-
-  Please add the method in your iOS project code.
-
       public func <%= @method_name %>(<%= @arg %>) -> Future<<%= @response_type %>, NSError> {
           return request(<%= @http_method %>, routes: "<%= @route %>", param: [<%= @param %>])
       }
