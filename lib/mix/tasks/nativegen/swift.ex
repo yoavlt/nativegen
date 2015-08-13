@@ -7,6 +7,7 @@ defmodule Mix.Tasks.Nativegen.Swift do
   import Mix.Nativegen
 
   @default_types [:string, :text, :uuid, :boolean, :integer, :float, :double, :decimal, :date, :datetime]
+  @swift_types ["String", "Bool", "Int", "Float", "Double", "NSDate"]
 
   @doc """
   Parse parameter to variable and Swift's type
@@ -67,5 +68,20 @@ defmodule Mix.Tasks.Nativegen.Swift do
     end)
     |> Enum.join(", ")
   end
+
+  def default_args(params) when is_list(params) do
+    params
+    |> Enum.map(fn {atom, var, type} ->
+      swift_type = to_swift_type(atom, type)
+      camel_case = to_camel_case(var)
+      arg(atom, camel_case, swift_type)
+    end)
+    |> Enum.join(", ")
+  end
+
+  def arg(_atom, variable, type) when type in @swift_types,
+  do: "#{variable}: #{type}"
+  def arg(:array, variable, type), do: "#{variable}: #{type}"
+  def arg(atom, variable, type), do: "#{variable}Id: Int"
 
 end

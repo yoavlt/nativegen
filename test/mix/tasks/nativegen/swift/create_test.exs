@@ -18,12 +18,6 @@ defmodule Nativegen.Swift.CreateTest do
     """
   end
 
-  test "default args" do
-    params = Mix.Nativegen.parse_params(@valid_params)
-    args = default_args(params)
-    assert args == "id: Int, username: String, age: Int, battleNum: Int, groupId: Int, items: [Item]"
-  end
-
   test "build create args" do
     params = Mix.Nativegen.parse_params(@valid_params)
     args = build_create_args(params)

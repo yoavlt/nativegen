@@ -136,21 +136,6 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
     default_args(params)
   end
 
-  def default_args(params) when is_list(params) do
-    params
-    |> Enum.map(fn {atom, var, type} ->
-      swift_type = to_swift_type(atom, type)
-      camel_case = to_camel_case(var)
-      arg(atom, camel_case, swift_type)
-    end)
-    |> Enum.join(", ")
-  end
-
-  def arg(_atom, variable, type) when type in @swift_types,
-  do: "#{variable}: #{type}"
-  def arg(:array, variable, type), do: "#{variable}: #{type}"
-  def arg(atom, variable, type), do: "#{variable}Id: Int"
-
   embed_template :custom_json_parser, """
           if let <%= @camel_var %>IdJson = json["<%= @var %>_id"] {
               <%= @camel_var %>Id = <%= @camel_var %>IdJson.intValue
