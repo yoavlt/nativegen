@@ -3,7 +3,7 @@ defmodule Swiftgen.CreateTest do
 
   import Mix.Tasks.Swiftgen.Create
 
-  @valid_params ["id:integer", "username:string", "age:integer", "group:Group", "items:array:Item"]
+  @valid_params ["id:integer", "username:string", "age:integer", "battle_num:integer", "group:Group", "items:array:Item"]
 
   test "build json params" do
     params = Mix.Swiftgen.parse_params(@valid_params)
@@ -11,6 +11,7 @@ defmodule Swiftgen.CreateTest do
         let id: Int
         let username: String
         let age: Int
+        let battleNum: Int
         var groupId: Int
         var group: Group
         var items: [Item]
@@ -20,19 +21,19 @@ defmodule Swiftgen.CreateTest do
   test "default args" do
     params = Mix.Swiftgen.parse_params(@valid_params)
     args = default_args(params)
-    assert args == "id: Int, username: String, age: Int, groupId: Int, items: [Item]"
+    assert args == "id: Int, username: String, age: Int, battleNum: Int, groupId: Int, items: [Item]"
   end
 
   test "build create args" do
     params = Mix.Swiftgen.parse_params(@valid_params)
     args = build_create_args(params)
-    assert args == "username: String, age: Int, groupId: Int"
+    assert args == "username: String, age: Int, battleNum: Int, groupId: Int"
   end
 
   test "build update args" do
     params = Mix.Swiftgen.parse_params(@valid_params)
     args = build_update_args(params)
-    assert args == "id: Int, username: String, age: Int, groupId: Int, items: [Item]"
+    assert args == "id: Int, username: String, age: Int, battleNum: Int, groupId: Int, items: [Item]"
   end
 
   test "build json parser" do
@@ -42,8 +43,9 @@ defmodule Swiftgen.CreateTest do
             id = json["id"].intValue
             username = json["username"].stringValue
             age = json["age"].intValue
+            battleNum = json["battle_num"].intValue
             if let groupIdJson = json["group_id"] {
-                group_id = json["group_id"].intValue
+                groupId = groupIdJson.intValue
             }
             if let groupJson = json["group"] {
                 group = Group(json: groupJson)
@@ -57,7 +59,7 @@ defmodule Swiftgen.CreateTest do
   test "generate params" do
     params = Mix.Swiftgen.parse_params(@valid_params)
     params = generate_params(params)
-    assert params == "username: username, age: age, group_id: groupId"
+    assert params == "username: username, age: age, battle_num: battleNum, group_id: groupId"
   end
 
   test "run" do

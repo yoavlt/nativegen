@@ -64,5 +64,12 @@ defmodule Mix.Swiftgen do
     String.capitalize(type)
   end
 
-end
+  def to_camel_case(word) do
+    [head | tail] = word |> String.split("_")
+    capitalized = tail
+                  |> Enum.map(&String.capitalize/1)
+                  |> Enum.join("")
+    head <> capitalized
+  end
 
+end

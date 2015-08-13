@@ -6,7 +6,7 @@ defmodule Mix.Tasks.Swiftgen.Create do
   @shortdoc "Create specified swift repository code"
 
   @moduledoc """
-  Create scaffold repository code.
+  Create repository code that contains CRUD methods.
 
   The generated code depends on the below libraries
   - Alamofire
@@ -55,8 +55,8 @@ defmodule Mix.Tasks.Swiftgen.Create do
       {_, _, _}      -> false
     end)
     |> Enum.map(fn
-      {atom, var, _} when atom in @default_types -> "#{var}: #{var}"
-      {_, var, _} -> "#{var}_id: #{var}Id"
+      {atom, var, _} when atom in @default_types -> "#{var}: #{to_camel_case(var)}"
+      {_, var, _} -> "#{var}_id: #{to_camel_case(var)}Id"
     end)
     |> Enum.join(", ")
   end
@@ -65,7 +65,8 @@ defmodule Mix.Tasks.Swiftgen.Create do
     params
     |> Enum.map(fn {atom, var, type} ->
         swift_type = to_swift_type(atom, type)
-        "    " <> json_param(atom, var, swift_type)
+        camel_case = to_camel_case(var)
+        "    " <> json_param(atom, camel_case, swift_type)
     end)
     |> Enum.join("\n")
   end
@@ -85,7 +86,7 @@ defmodule Mix.Tasks.Swiftgen.Create do
       {:array, variable, type} ->
         json_parser(:array, variable, type)
       {atom, variable, _} when atom in @default_types ->
-        "        #{variable} = " <> json_parser(atom, variable)
+        "        #{to_camel_case(variable)} = " <> json_parser(atom, variable)
       {atom, variable, _} ->
         json_parser(atom, variable)
     end)
@@ -111,21 +112,24 @@ defmodule Mix.Tasks.Swiftgen.Create do
   def json_parser(type, variable) when type in [:datetime, :date],
   do: "Repository.parseDate(json[\"#{variable}\"]!)"
 
-  def json_parser(type, variable) when is_atom(type) do
+  def json_parser(type, var) when is_atom(type) do
     class_name = type |> Atom.to_string |> String.capitalize
-    contents = custom_json_parser_template(var: variable, type: class_name)
+    camel_var = to_camel_case(var)
+    contents = custom_json_parser_template(var: var, camel_var: camel_var, type: class_name)
     String.slice(contents, 0, String.length(contents)-1)
   end
 
-  def json_parser(type, variable) when is_bitstring(type) do
+  def json_parser(type, var) when is_bitstring(type) do
     class_name = type |> String.capitalize
-    contents = custom_json_parser_template(var: variable, type: class_name)
+    camel_var = to_camel_case(var)
+    contents = custom_json_parser_template(var: var, camel_var: camel_var, type: class_name)
     String.slice(contents, 0, String.length(contents)-1)
   end
 
-  def json_parser(:array, variable, type) do
+  def json_parser(:array, var, type) do
     type_parser = json_parser(type, "$0")
-    contents = array_json_parser_template(var: variable, type_parser: type_parser)
+    camel_var = to_camel_case(var)
+    contents = array_json_parser_template(var: var, camel_var: camel_var, type_parser: type_parser)
     String.slice(contents, 0, String.length(contents)-1)
   end
 
@@ -149,7 +153,8 @@ defmodule Mix.Tasks.Swiftgen.Create do
     params
     |> Enum.map(fn {atom, var, type} ->
       swift_type = to_swift_type(atom, type)
-      arg(atom, var, swift_type)
+      camel_case = to_camel_case(var)
+      arg(atom, camel_case, swift_type)
     end)
     |> Enum.join(", ")
   end
@@ -160,17 +165,17 @@ defmodule Mix.Tasks.Swiftgen.Create do
   def arg(atom, variable, type), do: "#{variable}Id: Int"
 
   embed_template :custom_json_parser, """
-          if let <%= @var %>IdJson = json["<%= @var %>_id"] {
-              <%= @var %>_id = json["<%= @var %>_id"].intValue
+          if let <%= @camel_var %>IdJson = json["<%= @var %>_id"] {
+              <%= @camel_var %>Id = <%= @camel_var %>IdJson.intValue
           }
-          if let <%= @var %>Json = json["<%= @var %>"] {
-              <%= @var %> = <%= @type %>(json: <%= @var %>Json)
+          if let <%= @camel_var %>Json = json["<%= @var %>"] {
+              <%= @camel_var %> = <%= @type %>(json: <%= @camel_var %>Json)
           }
   """
 
   embed_template :array_json_parser, """
-          if let <%= @var %>Json = json["<%= @var %>"] {
-              <%= @var %> = <%= @var %>Json.arrayValue.map { <%= @type_parser %> }
+          if let <%= @camel_var %>Json = json["<%= @var %>"] {
+              <%= @camel_var %> = <%= @camel_var %>Json.arrayValue.map { <%= @type_parser %> }
           }
   """
 
