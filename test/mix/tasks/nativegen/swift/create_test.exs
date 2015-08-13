@@ -26,4 +26,14 @@ defmodule Nativegen.Swift.CreateTest do
     File.rm_rf("test_generate_directory")
   end
 
+  test "run with group" do
+    if File.exists?("test_generate_directory") do
+      File.rm_rf("test_generate_directory")
+    end
+    run(["test_generate_directory/test", "User", "users"] ++ @valid_params ++ ["--group", "v1"])
+    assert File.exists?("test_generate_directory/test/UserRepository.swift")
+    assert File.read!("test_generate_directory/test/UserRepository.swift") =~ "v1"
+    File.rm_rf("test_generate_directory")
+  end
+
 end

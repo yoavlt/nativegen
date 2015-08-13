@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
   import Mix.Generator
   import Mix.Nativegen
   import Mix.Tasks.Nativegen.Swift
-  import Mix.Tasks.Nativegen.Swift.Model
+  alias Mix.Tasks.Nativegen.Swift.Model
 
   @shortdoc "Create specified swift repository code"
 
@@ -20,6 +20,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
   """
 
   def run(args) do
+    {opts, args, _} = OptionParser.parse(args, [group: :string])
     [path, singular, plural | params] = args
 
     id_params = ["id:integer"] ++ params
@@ -27,13 +28,13 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
     parsed = parse_params(id_params)
     swift_params = swift_var_type(id_params)
 
-    group = "api" # TODO: customizable
+    group = opts[:group] || "api"
 
     file_path = target_path(path, singular <> "Repository.swift")
     contents = concrete_repository_template(
       singular: singular,
       plural: plural,
-      json_model: generate_json_model(singular, params),
+      json_model: Model.generate_json_model(singular, params),
       create_args: build_create_args(parsed),
       update_args: build_update_args(parsed),
       param: generate_params(parsed),
