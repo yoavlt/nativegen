@@ -1,2 +1,0 @@
-defmodule Swiftgen do
-end

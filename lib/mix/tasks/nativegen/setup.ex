@@ -1,7 +1,7 @@
-defmodule Mix.Tasks.Swiftgen.Setup do
+defmodule Mix.Tasks.Nativegen.Setup do
   use Mix.Task
   import Mix.Generator
-  import Mix.Swiftgen
+  import Mix.Nativegen
 
   @shortdoc "Setup swift code base"
 

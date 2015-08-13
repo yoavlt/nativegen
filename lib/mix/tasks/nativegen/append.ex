@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Swiftgen.Append do
+defmodule Mix.Tasks.Nativegen.Append do
   use Mix.Task
 
   @shortdoc "Append request method to existing client code"

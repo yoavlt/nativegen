@@ -1,12 +1,12 @@
-defmodule Swiftgen.CreateTest do
+defmodule Nativegen.CreateTest do
   use ExUnit.Case
 
-  import Mix.Tasks.Swiftgen.Create
+  import Mix.Tasks.Nativegen.Create
 
   @valid_params ["id:integer", "username:string", "age:integer", "battle_num:integer", "group:Group", "items:array:Item"]
 
   test "build json params" do
-    params = Mix.Swiftgen.parse_params(@valid_params)
+    params = Mix.Nativegen.parse_params(@valid_params)
     assert build_json_params(params) <> "\n" == ~S"""
         let id: Int
         let username: String
@@ -19,25 +19,25 @@ defmodule Swiftgen.CreateTest do
   end
 
   test "default args" do
-    params = Mix.Swiftgen.parse_params(@valid_params)
+    params = Mix.Nativegen.parse_params(@valid_params)
     args = default_args(params)
     assert args == "id: Int, username: String, age: Int, battleNum: Int, groupId: Int, items: [Item]"
   end
 
   test "build create args" do
-    params = Mix.Swiftgen.parse_params(@valid_params)
+    params = Mix.Nativegen.parse_params(@valid_params)
     args = build_create_args(params)
     assert args == "username: String, age: Int, battleNum: Int, groupId: Int"
   end
 
   test "build update args" do
-    params = Mix.Swiftgen.parse_params(@valid_params)
+    params = Mix.Nativegen.parse_params(@valid_params)
     args = build_update_args(params)
     assert args == "id: Int, username: String, age: Int, battleNum: Int, groupId: Int, items: [Item]"
   end
 
   test "build json parser" do
-    params = Mix.Swiftgen.parse_params(@valid_params)
+    params = Mix.Nativegen.parse_params(@valid_params)
     parser = build_json_parser(params)
     assert parser <> "\n" == ~S"""
             id = json["id"].intValue
@@ -57,7 +57,7 @@ defmodule Swiftgen.CreateTest do
   end
 
   test "generate params" do
-    params = Mix.Swiftgen.parse_params(@valid_params)
+    params = Mix.Nativegen.parse_params(@valid_params)
     params = generate_params(params)
     assert params == "username: username, age: age, battle_num: battleNum, group_id: groupId"
   end

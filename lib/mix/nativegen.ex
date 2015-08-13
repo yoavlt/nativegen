@@ -1,4 +1,4 @@
-defmodule Mix.Swiftgen do
+defmodule Mix.Nativegen do
 
   @moduledoc false
 

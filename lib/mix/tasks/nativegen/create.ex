@@ -1,7 +1,7 @@
-defmodule Mix.Tasks.Swiftgen.Create do
+defmodule Mix.Tasks.Nativegen.Create do
   use Mix.Task
   import Mix.Generator
-  import Mix.Swiftgen
+  import Mix.Nativegen
 
   @shortdoc "Create specified swift repository code"
 
@@ -14,7 +14,7 @@ defmodule Mix.Tasks.Swiftgen.Create do
   - BrightFutures
 
   ## Example
-    mix swiftgen.create /path/to/your/directory User users username:string group:Group items:array:Item
+    mix nativegen.create /path/to/your/directory User users username:string group:Group items:array:Item
   """
 
   @swift_types ["String", "Bool", "Int", "Float", "Double", "NSDate"]

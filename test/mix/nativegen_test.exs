@@ -1,7 +1,7 @@
-defmodule Swiftgen.SwiftgenTest do
+defmodule Nativegen.NativegenTest do
   use ExUnit.Case
 
-  import Mix.Swiftgen
+  import Mix.Nativegen
 
   @valid_args ["username:string", "age:integer", "group:Group", "items:array:Item"]
 
