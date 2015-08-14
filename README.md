@@ -31,7 +31,7 @@ $ mix do deps.get, mix compile
 
 ## iOS
 
-### Generating code depends on the follwoing library dependencies
+#### Generating code depends on the follwoing library
 * [Alamofire](https://github.com/Alamofire/Alamofire)
 * [SwiftyJSON](https://github.com/SwiftyJSON/SwiftyJSON)
 * [BrightFutures](https://github.com/Thomvis/BrightFutures)
