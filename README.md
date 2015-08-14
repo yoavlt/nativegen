@@ -1,6 +1,8 @@
 Nativegen
 ========
 
+[![Build Status](https://travis-ci.org/yoavlt/nativegen.svg)](https://travis-ci.org/yoavlt/nativegen)
+
 Nativegen is a native app accessing REST API source code generator.
 It is supported just Swift code now, but will Android, Unity and so on.
 
