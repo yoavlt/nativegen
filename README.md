@@ -1,4 +1,4 @@
-Nativegen
+![nativegen logo](https://raw.githubusercontent.com/yoavlt/nativegen/master/nativegen.png)
 ========
 
 [![Build Status](https://travis-ci.org/yoavlt/nativegen.svg)](https://travis-ci.org/yoavlt/nativegen)
