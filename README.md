@@ -2,7 +2,7 @@ Nativegen
 ========
 
 Nativegen is a native app accessing REST API source code generator.
-It is supported just Swift code now, but will Android or Unity.
+It is supported just Swift code now, but will Android, Unity and so on.
 
 ## Installation
 
