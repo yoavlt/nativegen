@@ -62,15 +62,15 @@ public class UserRepository : Repository {
     }
 
     public func show(id: Int) -> Future<User, NSError> {
-        return requestData(.GET, routes: "/api/users/\\(id)", param: nil)
+        return requestData(.GET, routes: "/api/users/\(id)", param: nil)
     }
 
     public func update(id: Int, username: String, items: [Item]) -> Future<User, NSError> {
-        return requestData(.PATCH, routes: "/api/users/\\(id)", param: ["user": [username: username]])
+        return requestData(.PATCH, routes: "/api/users/\(id)", param: ["user": [username: username]])
     }
 
     public func delete(id: Int) -> Future<Bool, NSError> {
-        return requestSuccess(.DELETE, routes: "/api/users/\\(id)", param: nil)
+        return requestSuccess(.DELETE, routes: "/api/users/\(id)", param: nil)
     }
 
     public func buyItem(itemId: Int) -> Future<Bool, NSError> {
