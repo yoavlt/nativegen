@@ -8,7 +8,15 @@ It is supported just Swift code now, but will Android, Unity and so on.
 
 You can add dependency in your `mix.exs` from Hex packages.
 
-    `{:nativegen, "~> 0.0.1"}`
+```:elixir
+    {:nativegen, "~> 0.0.1"}
+```
+
+then,
+
+```:sh
+$ mix deps.get && mix compile
+```
 
 ## Usage(Swift)
 
