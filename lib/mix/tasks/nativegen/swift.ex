@@ -91,4 +91,40 @@ defmodule Mix.Tasks.Nativegen.Swift do
     end
   end
 
+  @doc """
+  Parse swift repository code to {imports, jsom_models, repo_def, methods, repo_end}
+  """
+  def parse_swift(body) do
+    lines = body |> String.split("\n") |> Enum.map(&(&1 <> "\n"))
+    {imports, lines}     = while_imports(lines)
+    {json_models, lines} = while_json_models(lines)
+    {repo_def, lines}    = while_repo_def(lines)
+    {methods, repo_end}  = while_methods(lines)
+    {imports, json_models, repo_def, methods, repo_end}
+  end
+
+  def while_imports(lines) do
+    Enum.split_while(lines, fn line ->
+      not (line =~ ": JsonModel")
+    end)
+  end
+
+  def while_json_models(lines) do
+    Enum.split_while(lines, fn line ->
+      not (line =~ ": Repository")
+    end)
+  end
+
+  def while_repo_def(lines) do
+    Enum.split_while(lines, fn line ->
+      not (line =~ "public func")
+    end)
+  end
+
+  def while_methods(lines) do
+    Enum.split_while(lines, fn line ->
+      not (line == "}\n")
+    end)
+  end
+
 end

@@ -31,4 +31,57 @@ defmodule Nativegen.Swift.MethodTest do
     """
   end
 
+  test "append method content" do
+    alias Mix.Tasks.Nativegen.Swift.Create
+    Create.run(["test_generate_directory/test", "User", "users", "username:string", "items:array:Item"])
+    content = generate_method("post", "/users/buy", "buyItem", "Bool", ["item_id:integer"])
+    file_name = "test_generate_directory/test/UserRepository.swift"
+    append_file(content, file_name)
+
+    assert File.read!(file_name) == """
+    import Foundation
+    import BrightFutures
+    import Alamofire
+    import SwiftyJSON
+    
+    public class User : JsonModel {
+        let username: String
+        var items: [Item]
+        public required init(json: JSON) {
+            username = json["username"].stringValue
+            if let itemsJson = json["items"] {
+                items = itemsJson.arrayValue.map { Item(json: $0) }
+            }
+        }
+    }
+    
+    
+    public class UserRepository : Repository {
+    
+        public func create(username: String) -> Future<User, NSError> {
+            return requestData(.POST, routes: "/api/users", param: ["user": [username: username]])
+        }
+    
+        public func show(id: Int) -> Future<User, NSError> {
+            return requestData(.GET, routes: "/api/users/(id)", param: nil)
+        }
+    
+        public func update(id: Int, username: String, items: [Item]) -> Future<User, NSError> {
+            return requestData(.PATCH, routes: "/api/users/(id)", param: ["user": [username: username]])
+        }
+    
+        public func delete(id: Int) -> Future<Bool, NSError> {
+            return requestSuccess(.DELETE, routes: "/api/users/(id)", param: nil)
+        }
+    
+        public func buyItem(itemId: Int) -> Future<Bool, NSError> {
+            return requestSuccess(.POST, routes: "/users/buy", param: [item_id: itemId])
+        }
+    
+    }
+
+    """
+    File.rm_rf file_name
+  end
+
 end

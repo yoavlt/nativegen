@@ -24,5 +24,4 @@ defmodule Nativegen.SwiftTest do
     assert args == "id: Int, username: String, age: Int, battleNum: Int, groupId: Int, items: [Item]"
   end
 
-
 end

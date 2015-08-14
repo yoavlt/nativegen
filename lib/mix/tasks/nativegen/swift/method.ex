@@ -15,6 +15,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   """
 
   def run(args) do
+    {opts, args, _} = OptionParser.parse(args, file: :string)
     [http_method, route, method_name, response_type | params] = args
 
     content = generate_method(
@@ -25,7 +26,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
       params
     )
 
-    show_on_shell content
+    case opts[:file] do
+      nil ->
+        show_on_shell content
+      file_path ->
+        append_file(content, file_path)
+    end
   end
 
   def show_on_shell(content) do
@@ -34,6 +40,18 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     Please add the method in your iOS project code.
 
     """ <> content
+  end
+
+  def append_file(content, path) do
+    if File.exists?(path) do
+      {imports, json_models, repo_def, methods, repo_end} = File.read!(path)
+      |> parse_swift
+      methods = methods ++ [content, "\n"]
+      new_body = imports ++ json_models ++ repo_def ++ methods ++ repo_end
+      File.write! path, new_body
+    else
+      Mix.raise "File write error: no such file(#{path})"
+    end
   end
 
   def generate_method(http_method, route, method_name, response_type, params) when is_list(params) do
