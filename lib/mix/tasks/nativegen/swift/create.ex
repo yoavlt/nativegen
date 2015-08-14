@@ -73,15 +73,15 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
       }
 
       public func show(id: Int) -> Future<<%= @singular %>, NSError> {
-          return requestData(.GET, routes: "/<%= @group %>/<%= @plural %>/\(id)", param: nil)
+          return requestData(.GET, routes: "/<%= @group %>/<%= @plural %>/\\(id)", param: nil)
       }
 
       public func update(<%= @update_args %>) -> Future<<%= @singular %>, NSError> {
-          return requestData(.PATCH, routes: "/<%= @group %>/<%= @plural %>/\(id)", param: ["<%= @param_key %>": [<%= @param %>]])
+          return requestData(.PATCH, routes: "/<%= @group %>/<%= @plural %>/\\(id)", param: ["<%= @param_key %>": [<%= @param %>]])
       }
 
       public func delete(id: Int) -> Future<Bool, NSError> {
-          return requestSuccess(.DELETE, routes: "/<%= @group %>/<%= @plural %>/\(id)", param: nil)
+          return requestSuccess(.DELETE, routes: "/<%= @group %>/<%= @plural %>/\\(id)", param: nil)
       }
 
   }
