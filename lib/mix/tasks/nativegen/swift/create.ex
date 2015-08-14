@@ -26,7 +26,6 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
     id_params = ["id:integer"] ++ params
               |> Enum.uniq
     parsed = parse_params(id_params)
-    swift_params = swift_var_type(id_params)
 
     group = opts[:group] || "api"
 

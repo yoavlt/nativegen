@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   import Mix.Generator
   import Mix.Tasks.Nativegen.Swift
 
-  @shortdoc "Generate swift json class"
+  @shortdoc "Generate swift json model"
 
   @default_types [:string, :text, :uuid, :boolean, :integer, :float, :double, :decimal, :date, :datetime]
   @swift_types ["String", "Bool", "Int", "Float", "Double", "NSDate"]
@@ -18,13 +18,22 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   """
 
   def run(args) do
+    {opts, args, _} = OptionParser.parse(args, file: :string)
     [singular | params] = args
 
     content = generate_json_model(singular, params)
 
-    show_on_shell content
+    case opts[:file] do
+      nil ->
+        show_on_shell content
+      file_path ->
+        append_file(content, file_path)
+    end
   end
 
+  @doc """
+  Show json model on shell
+  """
   def show_on_shell(content) do
     Mix.shell.info """
     Please add the json model in your iOS project code.
@@ -32,6 +41,28 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
     """ <> content
   end
 
+  @doc """
+  Insert json model into your exisiting swift file
+  """
+  def append_file(content, file) do
+    if File.exists?(file) do
+      {pre, rest} = File.read!(file)
+                    |> String.split("\n") 
+                    |> Enum.split_while(&(not String.contains?(&1, ": Repository")))
+      pre  = drop_last_empty pre
+      rest = drop_last_empty rest
+      body = pre ++ [content] ++ rest
+              |> Enum.map(&(&1 <> "\n")) 
+              |> Enum.join
+      File.write! file, body
+    else
+      Mix.raise "File write error: no such file(#{file})"
+    end
+  end
+
+  @doc """
+  Generate json model from name and params
+  """
   def generate_json_model(singular, params) when is_list(params) do
     parsed = parse_params(params)
     json_params = parsed |> build_json_params

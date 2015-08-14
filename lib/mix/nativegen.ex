@@ -36,4 +36,23 @@ defmodule Mix.Nativegen do
     head <> capitalized
   end
 
+  @doc """
+  Split last \n line
+  """
+  def drop_last_empty(content) when is_bitstring(content) do
+    content
+    |> String.split("\n")
+    |> Enum.map(&(&1 <> "\n"))
+    |> drop_last_empty
+  end
+
+  def drop_last_empty(content) when is_list(content) do
+    last = content |> List.last
+    if last == "" do
+      content |> Enum.drop(-1)
+    else
+      content
+    end
+  end
+
 end
