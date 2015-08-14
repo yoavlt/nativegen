@@ -10,16 +10,20 @@ It is supported just Swift code now, but will Android, Unity and so on.
 
 ## Installation
 
-You can add dependency in your `mix.exs` from Hex packages.
+You can add dependency to your project's `mix.exs`.
 
 ```:elixir
-    {:nativegen, "~> 0.0.1"}
+  defp deps do
+    [
+      {:nativegen, "~> 0.0.2"}
+    ]
+  end
 ```
 
 then,
 
 ```:sh
-$ mix deps.get && mix compile
+$ mix do: deps.get, mix compile
 ```
 
 ## Usage(Swift)
