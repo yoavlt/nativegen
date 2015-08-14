@@ -9,7 +9,7 @@ Nativegen is a source code generator of native app accessing REST API.
 This can reduces your dull works at all.
 Especially, if you use [Phoenix](http://phoenixframework.org/) framework, this is for you.
 
-*It is supported just Swift code now, but will Android, Unity and so on.*
+*It is supported just Swift code yet, but will Android, Unity and so on.*
 
 ## Installation
 
