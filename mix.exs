@@ -29,9 +29,9 @@ defmodule Nativegen.Mixfile do
 
   defp package do
     [contributors: ["Takuma Yoshida"],
-      licenses: ["MIT License"],
+      licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/yoavlt/nativegen"},
-      files: ~w(mix.exs README.md lib)]
+    ]
   end
 
   # Dependencies can be Hex packages:
