@@ -99,7 +99,8 @@ defmodule Mix.Tasks.Nativegen.Swift do
     {imports, lines}     = while_imports(lines)
     {json_models, lines} = while_json_models(lines)
     {repo_def, lines}    = while_repo_def(lines)
-    {methods, repo_end}  = while_methods(lines)
+    {methods, lines}  = while_methods(lines)
+    repo_end = lines |> drop_last_break
     {imports, json_models, repo_def, methods, repo_end}
   end
 
@@ -110,9 +111,11 @@ defmodule Mix.Tasks.Nativegen.Swift do
   end
 
   def while_json_models(lines) do
-    Enum.split_while(lines, fn line ->
+    {jsons, lines} = Enum.split_while(lines, fn line ->
       not (line =~ ": Repository")
     end)
+    json_models = drop_last_break(jsons)
+    {json_models, lines}
   end
 
   def while_repo_def(lines) do

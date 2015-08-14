@@ -55,7 +55,6 @@ defmodule Nativegen.Swift.MethodTest do
         }
     }
     
-    
     public class UserRepository : Repository {
     
         public func create(username: String) -> Future<User, NSError> {
@@ -79,9 +78,8 @@ defmodule Nativegen.Swift.MethodTest do
         }
     
     }
-
     """
-    File.rm_rf file_name
+    File.rm_rf "test_generate_directory"
   end
 
 end

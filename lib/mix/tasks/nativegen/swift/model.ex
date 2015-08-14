@@ -46,13 +46,11 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   """
   def append_file(content, file) do
     if File.exists?(file) do
-      {pre, rest} = File.read!(file)
-                    |> String.split("\n") 
-                    |> Enum.split_while(&(not String.contains?(&1, ": Repository")))
-      pre  = drop_last_empty pre
-      rest = drop_last_empty rest
-      body = pre ++ [content] ++ rest
-              |> Enum.map(&(&1 <> "\n")) 
+      {imports, json_models, repo_def, methods, repo_end} = File.read!(file)
+                                                            |> parse_swift
+      json_models = json_models
+      new_json_models = json_models ++ [content, "\n"]
+      body = imports ++ new_json_models ++ repo_def ++ methods ++ repo_end
               |> Enum.join
       File.write! file, body
     else

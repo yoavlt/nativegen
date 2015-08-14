@@ -47,8 +47,16 @@ defmodule Mix.Nativegen do
   end
 
   def drop_last_empty(content) when is_list(content) do
+    drop_last_if(content, &(&1 == ""))
+  end
+
+  def drop_last_break(content) when is_list(content) do
+    drop_last_if(content, &(&1 == "\n"))
+  end
+
+  def drop_last_if(content, f) when is_list(content) do
     last = content |> List.last
-    if last == "" do
+    if f.(last) do
       content |> Enum.drop(-1)
     else
       content

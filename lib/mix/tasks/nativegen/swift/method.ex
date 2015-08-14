@@ -48,6 +48,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
       |> parse_swift
       methods = methods ++ [content, "\n"]
       new_body = imports ++ json_models ++ repo_def ++ methods ++ repo_end
+                  |> Enum.join
       File.write! path, new_body
     else
       Mix.raise "File write error: no such file(#{path})"
