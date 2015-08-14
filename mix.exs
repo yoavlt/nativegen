@@ -45,7 +45,7 @@ defmodule Nativegen.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:earmark, ">= 0.0.0"},
+      {:earmark, ">= 0.0.0", only: :dev},
       {:ex_doc, "~> 0.8", only: :dev},
       {:coverex, "~> 1.4.1", only: :test}
     ]
