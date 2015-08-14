@@ -2,6 +2,7 @@ Nativegen
 ========
 
 [![Build Status](https://travis-ci.org/yoavlt/nativegen.svg)](https://travis-ci.org/yoavlt/nativegen)
+[![Coverage Status](https://coveralls.io/repos/yoavlt/nativegen/badge.svg?branch=master&service=github)](https://coveralls.io/github/yoavlt/nativegen?branch=master)
 
 Nativegen is a native app accessing REST API source code generator.
 It is supported just Swift code now, but will Android, Unity and so on.
