@@ -153,29 +153,25 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return p.future
       }
 
-      func uploadStreamFile(file: File, routes: String, f: (Double) -> Void) -> Future<Bool, NSError> {
+      func uploadFile(url: NSURL, routes: String, f: (Double) -> Void) -> Future<Bool, NSError> {
           let p = Promise<Bool, NSError>()
-          if let stream = NSInputStream(URL: file.url) {
-              let fileSize = Filer.du(file.directory, path: file.relativePath)
-              Alamofire.upload(.POST, urlStr(routes), stream: stream)
-                  .progress { bytesWritten, totalBytesWritten, totalBytesExpectedToWrite in
-                      let ratio: Double = Double(totalBytesWritten) / Double(fileSize)
-                      f(ratio)
-                  }
-                  .responseJSON { _, _, json, error in
-                      if let nserror = error {
-                          p.failure(nserror)
-                      } else {
-                          if let success = JSON(json!)["success"].bool {
-                              p.success(success)
-                          } else {
-                              p.failure(NSError(domain: "request success error", code: 0, userInfo: nil))
-                          }
-                      }
+          Alamofire.upload(.POST, urlStr(routes), file: url)
+              .progress { bytesWritten, totalBytesWritten, totalBytesExpectedToWrite in
+                  let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+                  f(ratio)
               }
-          } else {
-              p.failure(NSError(domain: "no such url", code: 100, userInfo: nil))
-          }
+              .responseJSON { _, _, json, error in
+                  if let nserror = error {
+                      p.failure(nserror)
+                  } else {
+                      if let success = JSON(json!)["success"].bool {
+                          p.success(success)
+                      } else {
+                          p.failure(NSError(domain: "request success error", code: 0, userInfo: nil))
+                      }
+                  }
+              }
+
           return p.future
       }
 
