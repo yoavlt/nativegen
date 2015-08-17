@@ -74,7 +74,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   if let nserror = err {
                       p.failure(nserror)
                   } else {
-                      if let errors = JSON(rawValue:json!)["errors"] {
+                      if let errors = JSON(rawValue:json!)?["errors"] {
                           p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
                           return
                       }
@@ -96,7 +96,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   if let nserror = err {
                       p.failure(nserror)
                   } else {
-                      if let errors = JSON(rawValue:json!)["errors"] {
+                      if let errors = JSON(rawValue:json!)?["errors"] {
                           p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
                           return
                       }
@@ -118,14 +118,14 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   if let nserror = err {
                       p.failure(nserror)
                   } else {
-                      if let errors = JSON(rawValue:json!)["errors"] {
+                      if let errors = JSON(rawValue:json!)?["errors"] {
                           p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
                           return
                       }
                       if let success = JSON(json!)["success"].bool {
                           p.success(success)
                       } else {
-                          p.failure(AError(message: "error", errorCode: 0))
+                          p.failure(NSError(domain: "request success error", code: 0, userInfo: nil))
                       }
                   }
           }
@@ -182,7 +182,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   if let nserror = err {
                       p.failure(nserror)
                   } else {
-                      if let errors = JSON(rawValue:json!)["errors"] {
+                      if let errors = JSON(rawValue:json!)?["errors"] {
                           p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
                           return
                       }
@@ -203,9 +203,9 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           c.month = month
           c.day = day
 
-          var gregorian = NSCalendar(identifier:NSGregorianCalendar)
-          var date = gregorian.dateFromComponents(c)
-          return date
+          var gregorian = NSCalendar(identifier:NSCalendarIdentifierGregorian)
+          var date = gregorian!.dateFromComponents(c)
+          return date!
       }
 
       static func parseDate(json: JSON) -> NSDate {
