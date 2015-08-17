@@ -6,7 +6,7 @@
 [![hex.pm version](https://img.shields.io/hexpm/v/nativegen.svg)](https://hex.pm/packages/nativegen)
 
 Nativegen is a source code generator of native app accessing REST API.
-This can reduces your dull works at all.
+This can reduce your dull works at all.
 If you use [Phoenix](http://phoenixframework.org/) framework, this is for you.
 
 *It is supported just Swift code yet, but will Android, Unity and so on.*
@@ -18,7 +18,7 @@ You can add dependency to your project's `mix.exs`.
 ```:elixir
   defp deps do
     [
-      {:nativegen, "~> 0.1.1"}
+      {:nativegen, "~> 0.1.2"}
     ]
   end
 ```
