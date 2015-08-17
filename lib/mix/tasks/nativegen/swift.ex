@@ -63,8 +63,10 @@ defmodule Mix.Tasks.Nativegen.Swift do
       {_, _, _}      -> false
     end)
     |> Enum.map(fn
-      {atom, var, _} when atom in @default_types -> "#{var}: #{to_camel_case(var)}"
-      {_, var, _} -> "#{var}_id: #{to_camel_case(var)}Id"
+      {:date, var, _} -> "\"#{var}\": toDateObj(#{to_camel_case(var)})"
+      {:datetime, var, _} -> "\"#{var}\": toDateTimeObj(#{to_camel_case(var)})"
+      {atom, var, _} when atom in @default_types -> "\"#{var}\": #{to_camel_case(var)}"
+      {_, var, _} -> "\"#{var}_id\": #{to_camel_case(var)}Id"
     end)
     |> Enum.join(", ")
   end

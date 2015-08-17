@@ -58,7 +58,7 @@ public class User : JsonModel {
 public class UserRepository : Repository {
 
     public func create(username: String) -> Future<User, NSError> {
-        return requestData(.POST, routes: "/api/users", param: ["user": [username: username]])
+        return requestData(.POST, routes: "/api/users", param: ["user": ["username": username]])
     }
 
     public func show(id: Int) -> Future<User, NSError> {
@@ -66,7 +66,7 @@ public class UserRepository : Repository {
     }
 
     public func update(id: Int, username: String, items: [Item]) -> Future<User, NSError> {
-        return requestData(.PATCH, routes: "/api/users/\(id)", param: ["user": [username: username]])
+        return requestData(.PATCH, routes: "/api/users/\(id)", param: ["user": ["username": username]])
     }
 
     public func delete(id: Int) -> Future<Bool, NSError> {
@@ -74,7 +74,7 @@ public class UserRepository : Repository {
     }
 
     public func buyItem(itemId: Int) -> Future<Bool, NSError> {
-        return requestSuccess(.POST, routes: "/users/buy", param: [item_id: itemId])
+        return requestSuccess(.POST, routes: "/users/buy", param: ["item_id": itemId])
     }
 
 }

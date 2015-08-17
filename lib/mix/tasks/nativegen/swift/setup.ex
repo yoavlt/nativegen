@@ -219,6 +219,29 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return parseDate(year, month: month, day: day)
       }
 
+      public func dateComponent(date: NSDate, component : NSCalendarUnit) -> Int {
+          let calendar = NSCalendar.currentCalendar()
+          let components = calendar.components(component, fromDate: date)
+
+          return components.valueForComponent(component)
+      }
+
+      func toDateObj(date: NSDate) -> [String: Int] {
+          return [
+              "year": dateComponent(date, component: .CalendarUnitYear),
+              "month": dateComponent(date, component: .CalendarUnitMonth),
+              "day": dateComponent(date, component: .CalendarUnitDay)
+          ]
+      }
+
+      func toDateTimeObj(date: NSDate) -> [String: Int] {
+          var dateObj = toDateObj(date)
+          dateObj.updateValue(dateComponent(date, component: .CalendarUnitHour), forKey: "hour")
+          dateObj.updateValue(dateComponent(date, component: .CalendarUnitMinute), forKey: "minute")
+          dateObj.updateValue(dateComponent(date, component: .CalendarUnitSecond), forKey: "second")
+          return dateObj
+      }
+
   }
   """
 

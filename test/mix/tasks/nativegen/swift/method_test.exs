@@ -12,7 +12,7 @@ defmodule Nativegen.Swift.MethodTest do
     ["username:string", "age:integer"]
     ) == """
         public func createUser(username: String, age: Int) -> Future<User, NSError> {
-            return request(.POST, routes: "/users/create", param: [username: username, age: age])
+            return request(.POST, routes: "/users/create", param: ["username": username, "age": age])
         }
     """
   end
@@ -27,6 +27,20 @@ defmodule Nativegen.Swift.MethodTest do
     ) == """
         public func deleteUser(id: Int) -> Future<Bool, NSError> {
             return requestSuccess(.DELETE, routes: "/users/delete", param: nil)
+        }
+    """
+  end
+
+  test "generate a method with datetime parameter" do
+    assert generate_method(
+    "post",
+    "/users/register",
+    "registerUser",
+    "Bool",
+    ["username:string", "registered_at:datetime"]
+    ) == """
+        public func registerUser(username: String, registeredAt: NSDate) -> Future<Bool, NSError> {
+            return requestSuccess(.POST, routes: "/users/register", param: ["username": username, "registered_at": toDateTimeObj(registeredAt)])
         }
     """
   end
@@ -58,7 +72,7 @@ defmodule Nativegen.Swift.MethodTest do
     public class UserRepository : Repository {
     
         public func create(username: String) -> Future<User, NSError> {
-            return requestData(.POST, routes: "/api/users", param: ["user": [username: username]])
+            return requestData(.POST, routes: "/api/users", param: ["user": ["username": username]])
         }
     
         public func show(id: Int) -> Future<User, NSError> {
@@ -66,7 +80,7 @@ defmodule Nativegen.Swift.MethodTest do
         }
     
         public func update(id: Int, username: String, items: [Item]) -> Future<User, NSError> {
-            return requestData(.PATCH, routes: "/api/users/\\(id)", param: ["user": [username: username]])
+            return requestData(.PATCH, routes: "/api/users/\\(id)", param: ["user": ["username": username]])
         }
     
         public func delete(id: Int) -> Future<Bool, NSError> {
@@ -74,7 +88,7 @@ defmodule Nativegen.Swift.MethodTest do
         }
     
         public func buyItem(itemId: Int) -> Future<Bool, NSError> {
-            return requestSuccess(.POST, routes: "/users/buy", param: [item_id: itemId])
+            return requestSuccess(.POST, routes: "/users/buy", param: ["item_id": itemId])
         }
     
     }
