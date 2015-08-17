@@ -132,6 +132,53 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return p.future
       }
 
+      func uploadStreamFile(stream: NSInputStream, routes: String, f: (Double) -> Void) -> Future<Bool, NSError> {
+          let p = Promise<Bool, NSError>()
+          Alamofire.upload(.POST, urlStr(routes), stream: stream)
+              .progress { bytesWritten, totalBytesWritten, totalBytesExpectedToWrite in
+                  let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+                  f(ratio)
+              }
+              .responseJSON { _, _, json, error in
+                  if let nserror = error {
+                      p.failure(nserror)
+                  } else {
+                      if let success = JSON(json!)["success"].bool {
+                          p.success(success)
+                      } else {
+                          p.failure(NSError(domain: "request success error", code: 0, userInfo: nil))
+                      }
+                  }
+              }
+          return p.future
+      }
+
+      func uploadStreamFile(file: File, routes: String, f: (Double) -> Void) -> Future<Bool, NSError> {
+          let p = Promise<Bool, NSError>()
+          if let stream = NSInputStream(URL: file.url) {
+              let fileSize = Filer.du(file.directory, path: file.relativePath)
+              Alamofire.upload(.POST, urlStr(routes), stream: stream)
+                  .progress { bytesWritten, totalBytesWritten, totalBytesExpectedToWrite in
+                      let ratio: Double = Double(totalBytesWritten) / Double(fileSize)
+                      f(ratio)
+                  }
+                  .responseJSON { _, _, json, error in
+                      if let nserror = error {
+                          p.failure(nserror)
+                      } else {
+                          if let success = JSON(json!)["success"].bool {
+                              p.success(success)
+                          } else {
+                              p.failure(NSError(domain: "request success error", code: 0, userInfo: nil))
+                          }
+                      }
+              }
+          } else {
+              p.failure(NSError(domain: "no such url", code: 100, userInfo: nil))
+          }
+          return p.future
+      }
+
       func requestData<T : JsonModel>(method: Alamofire.Method, routes: String, param: [String: AnyObject]?) -> Future<T, NSError> {
           let p = Promise<T, NSError>()
           Alamofire.request(method, urlStr(routes), parameters: param)
