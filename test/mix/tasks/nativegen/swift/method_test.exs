@@ -37,10 +37,10 @@ defmodule Nativegen.Swift.MethodTest do
     "/users/register",
     "registerUser",
     "Bool",
-    ["username:string", "registered_at:datetime"]
+    ["username:string", "registered_at:datetime", "join_date:date"]
     ) == """
-        public func registerUser(username: String, registeredAt: NSDate) -> Future<Bool, NSError> {
-            return requestSuccess(.POST, routes: "/users/register", param: ["username": username, "registered_at": toDateTimeObj(registeredAt)])
+        public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate) -> Future<Bool, NSError> {
+            return requestSuccess(.POST, routes: "/users/register", param: ["username": username, "registered_at": toDateTimeObj(registeredAt), "join_date": toDateObj(joinDate)])
         }
     """
   end
