@@ -53,7 +53,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
       init(json: JSON)
   }
 
-  public class Repository {
+  public class Repository : NSObject {
       let host = "<%= @host %>"
       public init() {
 

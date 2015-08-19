@@ -66,7 +66,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
 
   <%= @json_model %>
 
-  public class <%= @singular %>Repository : Repository {
+  public class <%= @singular %>Repository : NSObject, Repository {
 
       public func create(<%= @create_args %>) -> Future<<%= @singular %>, NSError> {
           return requestData(.POST, routes: "/<%= @group %>/<%= @plural %>", param: ["<%= @param_key %>": [<%= @param %>]])

@@ -162,7 +162,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   """
 
   embed_template :json_model, """
-  public class <%= @singular %> : JsonModel {
+  public class <%= @singular %> : NSObject, JsonModel {
   <%= @json_params %>
       public required init(json: JSON) {
   <%= @json_parser %>

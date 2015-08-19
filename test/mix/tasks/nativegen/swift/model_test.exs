@@ -42,7 +42,7 @@ defmodule Nativegen.Swift.ModelTest do
     assert generate_json_model(
     "User",
     ["username:string", "age:integer", "first_name:string", "last_name:string"]) === """
-    public class User : JsonModel {
+    public class User : NSObject, JsonModel {
         let username: String
         let age: Int
         let firstName: String
@@ -70,14 +70,14 @@ defmodule Nativegen.Swift.ModelTest do
     import Alamofire
     import SwiftyJSON
     
-    public class User : JsonModel {
+    public class User : NSObject, JsonModel {
         let username: String
         public required init(json: JSON) {
             username = json["username"].stringValue
         }
     }
     
-    public class Item : JsonModel {
+    public class Item : NSObject, JsonModel {
         let name: String
         let strength: Float
         public required init(json: JSON) {
@@ -86,7 +86,7 @@ defmodule Nativegen.Swift.ModelTest do
         }
     }
     
-    public class UserRepository : Repository {
+    public class UserRepository : NSObject, Repository {
     
         public func create(username: String) -> Future<User, NSError> {
             return requestData(.POST, routes: "/api/users", param: ["user": ["username": username]])
