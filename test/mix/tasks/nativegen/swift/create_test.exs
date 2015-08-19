@@ -36,4 +36,26 @@ defmodule Nativegen.Swift.CreateTest do
     File.rm_rf("test_generate_directory")
   end
 
+  test "generate default methods by swift" do
+    params = ["username:string"]
+    default_methods = default_methods(:swift, "users", params, ["id:integer"] ++ params)
+    assert default_methods == """
+        public func create(username: String) -> Future<User, NSError> {
+            return requestData(.POST, routes: "/api/users", param: ["username": username])
+        }
+
+        public func show(id: Int) -> Future<User, NSError> {
+            return requestData(.GET, routes: "/api/users/\\(id)", param: nil)
+        }
+
+        public func update(username: String) -> Future<User, NSError> {
+            return requestData(.PATCH, routes: "/api/users/\\(id)", param: ["username": username])
+        }
+
+        public func delete(id: Int) -> Future<Bool, NSError> {
+            return requestSuccess(.DELETE, routes: "/api/users/\\(id)", param: nil)
+        }
+    """
+  end
+
 end

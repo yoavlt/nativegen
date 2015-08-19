@@ -55,7 +55,15 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     end
   end
 
+  def generate_method(:data, http_method, route, method_name, response_type, params) when is_list(params) do
+    generate_method(request_method("Data"), http_method, route, method_name, response_type, params)
+  end
+
   def generate_method(http_method, route, method_name, response_type, params) when is_list(params) do
+    generate_method(request_method(response_type), http_method, route, method_name, response_type, params)
+  end
+
+  def generate_method(request_method, http_method, route, method_name, response_type, params) when is_list(params) do
     http_method = http_method |> String.to_atom |> to_swift_method
     param = params |> parse_params |> generate_params |> wrap_array
     arg = params |> parse_params |> default_args
@@ -65,13 +73,14 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     param: param,
     arg: arg,
     response_type: response_type,
-    request_method: request_method(response_type),
+    request_method: request_method,
     http_method: http_method,
     route: route
     )
   end
 
   def request_method("Bool"), do: "requestSuccess"
+  def request_method("Data"), do: "requestData"
   def request_method(_), do: "request"
 
   embed_template :method, """

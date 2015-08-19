@@ -44,6 +44,20 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
     create_file(file_path, contents)
   end
 
+  def default_methods(:swift, plural, params, id_params) do
+    alias Mix.Tasks.Nativegen.Swift.Method
+    IO.inspect params
+    create_method = Method.generate_method(:data, "post", "/api/#{plural}", "create", "User", params)
+    show_method   = Method.generate_method(:data, "get", "/api/#{plural}/\\(id)", "show", "User", ["id:integer"])
+    update_method = Method.generate_method(:data, "patch", "/api/#{plural}/\\(id)", "update", "User", params)
+    delete_method = Method.generate_method("delete", "/api/#{plural}/\\(id)", "delete", "Bool", ["id:integer"])
+    [create_method, show_method, update_method, delete_method] |> Enum.join("\n")
+  end
+
+  def default_methods(:objc_comp, param) do
+
+  end
+
   def build_create_args(params) when is_list(params) do
     params
     |> Enum.reject(fn
