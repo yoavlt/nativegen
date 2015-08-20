@@ -16,13 +16,16 @@ defmodule Mix.Nativegen do
   """
   def parse_params(params) when is_list(params) do
     params
-    |> Enum.map(&String.split(&1, ":"))
-    |> Enum.map(fn
+    |> Enum.map(&parse_param/1)
+  end
+
+  def parse_param(param) when is_bitstring(param) do
+    case String.split(param, ":") do
       [variable, "array", type] ->
         {:array, variable, type}
       [variable, type] ->
         {String.to_atom(type), variable, type}
-    end)
+    end
   end
 
   @doc """

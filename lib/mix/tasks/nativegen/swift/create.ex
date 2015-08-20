@@ -34,8 +34,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
       singular: singular,
       plural: plural,
       json_model: Model.generate_json_model(singular, params),
-      create_args: build_create_args(parsed),
-      update_args: build_update_args(parsed),
+      methods: default_methods(:swift, plural, group, params, id_params),
       param: generate_params(parsed),
       param_key: String.downcase(singular),
       group: group
@@ -44,32 +43,27 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
     create_file(file_path, contents)
   end
 
-  def default_methods(:swift, plural, params, id_params) do
+  def default_methods(:swift, plural, group, params, id_params) do
     alias Mix.Tasks.Nativegen.Swift.Method
-    IO.inspect params
-    create_method = Method.generate_method(:data, "post", "/api/#{plural}", "create", "User", params)
-    show_method   = Method.generate_method(:data, "get", "/api/#{plural}/\\(id)", "show", "User", ["id:integer"])
-    update_method = Method.generate_method(:data, "patch", "/api/#{plural}/\\(id)", "update", "User", params)
-    delete_method = Method.generate_method("delete", "/api/#{plural}/\\(id)", "delete", "Bool", ["id:integer"])
+    create_method = Method.generate_method(:data, "post", "/#{group}/#{plural}", "create", "User", build_create_args(params))
+    show_method   = Method.generate_method(:data, "get", "/#{group}/#{plural}/\\(id)", "show", "User", ["id:integer"])
+    update_method = Method.generate_method(:data, "patch", "/#{group}/#{plural}/\\(id)", "update", "User", id_params)
+    delete_method = Method.generate_method("delete", "/#{group}/#{plural}/\\(id)", "delete", "Bool", ["id:integer"])
     [create_method, show_method, update_method, delete_method] |> Enum.join("\n")
   end
 
   def default_methods(:objc_comp, param) do
-
   end
 
   def build_create_args(params) when is_list(params) do
     params
-    |> Enum.reject(fn
-      {_, "id", _}   -> true
-      {:array, _, _} -> true
-      {_, _, _}      -> false
+    |> Enum.reject(fn param ->
+      case parse_param(param) do
+        {_, "id", _}   -> true
+        {:array, _, _} -> true
+        {_, _, _}      -> false
+      end
     end)
-    |> default_args
-  end
-
-  def build_update_args(params) when is_list(params) do
-    default_args(params)
   end
 
   embed_template :concrete_repository, """
@@ -82,22 +76,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
 
   public class <%= @singular %>Repository : NSObject, Repository {
 
-      public func create(<%= @create_args %>) -> Future<<%= @singular %>, NSError> {
-          return requestData(.POST, routes: "/<%= @group %>/<%= @plural %>", param: ["<%= @param_key %>": [<%= @param %>]])
-      }
-
-      public func show(id: Int) -> Future<<%= @singular %>, NSError> {
-          return requestData(.GET, routes: "/<%= @group %>/<%= @plural %>/\\(id)", param: nil)
-      }
-
-      public func update(<%= @update_args %>) -> Future<<%= @singular %>, NSError> {
-          return requestData(.PATCH, routes: "/<%= @group %>/<%= @plural %>/\\(id)", param: ["<%= @param_key %>": [<%= @param %>]])
-      }
-
-      public func delete(id: Int) -> Future<Bool, NSError> {
-          return requestSuccess(.DELETE, routes: "/<%= @group %>/<%= @plural %>/\\(id)", param: nil)
-      }
-
+  <%= @methods %>
   }
   """
 end

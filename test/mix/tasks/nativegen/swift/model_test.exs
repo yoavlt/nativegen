@@ -89,7 +89,7 @@ defmodule Nativegen.Swift.ModelTest do
     public class UserRepository : NSObject, Repository {
     
         public func create(username: String) -> Future<User, NSError> {
-            return requestData(.POST, routes: "/api/users", param: ["user": ["username": username]])
+            return requestData(.POST, routes: "/api/users", param: ["username": username])
         }
     
         public func show(id: Int) -> Future<User, NSError> {
@@ -97,7 +97,7 @@ defmodule Nativegen.Swift.ModelTest do
         }
     
         public func update(id: Int, username: String) -> Future<User, NSError> {
-            return requestData(.PATCH, routes: "/api/users/\\(id)", param: ["user": ["username": username]])
+            return requestData(.PATCH, routes: "/api/users/\\(id)", param: ["username": username])
         }
     
         public func delete(id: Int) -> Future<Bool, NSError> {
