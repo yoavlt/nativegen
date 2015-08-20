@@ -59,6 +59,30 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     generate_method(request_method("Data"), http_method, route, method_name, response_type, params)
   end
 
+  def generate_method(:objc_data, http_method, route, method_name, response_type, params) when is_list(params) do
+    generate_method(:objc, request_method("Data"), http_method, route, method_name, response_type, params)
+  end
+
+  def generate_method(:objc, http_method, route, method_name, response_type, params) when is_list(params) do
+    generate_method(:objc, request_method(response_type), http_method, route, method_name, response_type, params)
+  end
+
+  def generate_method(:objc, request_method, http_method, route, method_name, response_type, params) when is_list(params) do
+    http_method = http_method |> String.to_atom |> to_swift_method
+    param = params |> parse_params |> generate_params |> wrap_array
+    arg = params |> parse_params |> default_args
+
+    objc_method_template(
+    method_name: method_name,
+    param: param,
+    arg: arg,
+    response_type: response_type,
+    request_method: request_method,
+    http_method: http_method,
+    route: route
+    )
+  end
+
   def generate_method(http_method, route, method_name, response_type, params) when is_list(params) do
     generate_method(request_method(response_type), http_method, route, method_name, response_type, params)
   end
@@ -86,6 +110,14 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   embed_template :method, """
       public func <%= @method_name %>(<%= @arg %>) -> Future<<%= @response_type %>, NSError> {
           return <%= @request_method %>(<%= @http_method %>, routes: "<%= @route %>", param: <%= @param %>)
+      }
+  """
+
+  embed_template :objc_method, """
+      public func <%= @method_name %>(<%= @arg %>, onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
+          <%= @request_method %>(<%= @http_method %>, routes: "<%= @route %>", param: <%= @param %>)
+              .onSuccess { data in onSuccess(data) }
+              .onFailure { error in onError(error) }
       }
   """
 
