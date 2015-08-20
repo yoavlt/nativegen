@@ -8,4 +8,13 @@ defmodule Nativegen.NativegenTest do
     assert to_camel_case("hoge") == "hoge"
   end
 
+  test "drop last empty" do
+    assert drop_last_empty(["hoge", "fuga", ""]) == ["hoge", "fuga"]
+    assert drop_last_empty(["hoge", "fuga", ""]) == ["hoge", "fuga"]
+  end
+
+  test "drop last break" do
+    assert drop_last_break(["hoge", "fuga", "\n", "\n"]) == ["hoge", "fuga", "\n"]
+  end
+
 end
