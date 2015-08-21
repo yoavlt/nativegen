@@ -52,7 +52,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
     [create_method, show_method, update_method, delete_method] |> Enum.join("\n")
   end
 
-  def default_methods(:objc_comp, param) do
+  def default_methods(:objc_comp, _param) do
   end
 
   def build_create_args(params) when is_list(params) do

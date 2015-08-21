@@ -63,6 +63,23 @@ defmodule Nativegen.Swift.MethodTest do
     """
   end
 
+  test "generate a objective-c comatible data method" do
+    assert generate_method(
+    :objc_data,
+    "post",
+    "/users/show/:id",
+    "registerUser",
+    "Bool",
+    ["username:string", "registered_at:datetime", "join_date:date"]
+    ) == """
+        public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate, onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
+            requestData(.POST, routes: "/users/show/\\(id)", param: ["username": username, "registered_at": toDateTimeObj(registeredAt), "join_date": toDateObj(joinDate)])
+                .onSuccess { data in onSuccess(data) }
+                .onFailure { error in onError(error) }
+        }
+    """
+  end
+
   test "append method content" do
     alias Mix.Tasks.Nativegen.Swift.Create
     Create.run(["test_generate_directory/test", "User", "users", "username:string", "items:array:Item"])
@@ -112,6 +129,16 @@ defmodule Nativegen.Swift.MethodTest do
     }
     """
     File.rm_rf "test_generate_directory"
+  end
+
+  test "extract parameter" do
+    assert extract_param("/users/:id/show") == %{"param" => "id"}
+    assert extract_param("/users/:id") == %{"param" => "id"}
+  end
+
+  test "replace parmeter in router" do
+    method_name = "/users/:id/show/:hoge"
+    assert replace_param(method_name) == "/users/\\(id)/show/\\(hoge)"
   end
 
 end

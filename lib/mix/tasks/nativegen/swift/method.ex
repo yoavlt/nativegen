@@ -79,7 +79,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     response_type: response_type,
     request_method: request_method,
     http_method: http_method,
-    route: route
+    route: replace_param(route)
     )
   end
 
@@ -99,8 +99,28 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     response_type: response_type,
     request_method: request_method,
     http_method: http_method,
-    route: route
+    route: replace_param(route)
     )
+  end
+
+  def replace_param(method_name) do
+    case extract_param(method_name) do
+      nil -> method_name
+      %{"param" => param} ->
+        next = String.replace(method_name, ":" <> param, "\\(#{param})")
+        replace_param(next)
+    end
+  end
+
+  @doc ~S"""
+  extract parameters from route.
+
+  Example:
+  iex> extract_param("/users/:id/show")
+  %{"param" => "id"}
+  """
+  def extract_param(method_name) do
+    Regex.named_captures(~r/:(?<param>.+?)(\/|$)/, method_name)
   end
 
   def request_method("Bool"), do: "requestSuccess"
