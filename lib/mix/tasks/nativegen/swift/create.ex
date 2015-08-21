@@ -20,7 +20,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
   """
 
   def run(args) do
-    {opts, args, _} = OptionParser.parse(args, [group: :string])
+    {opts, args, _} = OptionParser.parse(args, group: :string, objc: :boolean)
     [path, singular, plural | params] = args
 
     id_params = ["id:integer"] ++ params
@@ -30,11 +30,17 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
     group = opts[:group] || "api"
 
     file_path = target_path(path, singular <> "Repository.swift")
+    methods = if opts[:objc] do
+      default_methods(:objc_comp, plural, group, params, id_params)
+    else
+      default_methods(:swift, plural, group, params, id_params)
+    end
+
     contents = concrete_repository_template(
       singular: singular,
       plural: plural,
       json_model: Model.generate_json_model(singular, params),
-      methods: default_methods(:swift, plural, group, params, id_params),
+      methods: methods,
       param: generate_params(parsed),
       param_key: String.downcase(singular),
       group: group
@@ -52,7 +58,13 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
     [create_method, show_method, update_method, delete_method] |> Enum.join("\n")
   end
 
-  def default_methods(:objc_comp, _param) do
+  def default_methods(:objc_comp, plural, group, params, id_params) do
+    alias Mix.Tasks.Nativegen.Swift.Method
+    create_method = Method.generate_method(:objc_data, "post", "/#{group}/#{plural}", "create", "User", build_create_args(params))
+    show_method   = Method.generate_method(:objc_data, "get", "/#{group}/#{plural}/\\(id)", "show", "User", ["id:integer"])
+    update_method = Method.generate_method(:objc_data, "patch", "/#{group}/#{plural}/\\(id)", "update", "User", id_params)
+    delete_method = Method.generate_method(:objc, "delete", "/#{group}/#{plural}/\\(id)", "delete", "Bool", ["id:integer"])
+    [create_method, show_method, update_method, delete_method] |> Enum.join("\n")
   end
 
   def build_create_args(params) when is_list(params) do

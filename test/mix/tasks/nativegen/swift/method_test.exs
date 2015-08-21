@@ -143,6 +143,8 @@ defmodule Nativegen.Swift.MethodTest do
   test "generate content" do
     content = generate_content(["post", "/users/:id/postMessage", "postMessage", "Bool", "message:string", "user:users"], [objc: true])
     refute content =~ "Future"
+    content = generate_content(["post", "/users/:id/postMessage", "postMessage", "Bool", "message:string", "user:users"], nil)
+    assert content =~ "Future"
   end
 
 end
