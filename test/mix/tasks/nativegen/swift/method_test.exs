@@ -140,4 +140,9 @@ defmodule Nativegen.Swift.MethodTest do
     assert replace_param(method_name) == "/users/\\(id)/show/\\(hoge)"
   end
 
+  test "generate content" do
+    content = generate_content(["post", "/users/:id/postMessage", "postMessage", "Bool", "message:string", "user:users"], [objc: true])
+    refute content =~ "Future"
+  end
+
 end

@@ -15,17 +15,10 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   """
 
   def run(args) do
-    {opts, args, _} = OptionParser.parse(args, file: :string)
-    [http_method, route, method_name, response_type | params] = args
+    {opts, args, _} = OptionParser.parse(args, file: :string, objc: :boolean)
+    # [http_method, route, method_name, response_type | params] = args
 
-    content = generate_method(
-      http_method,
-      route,
-      method_name,
-      response_type,
-      params
-    )
-
+    content = generate_content(args, opts)
     case opts[:file] do
       nil ->
         show_on_shell content
@@ -40,6 +33,17 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     Please add the method in your iOS project code.
 
     """ <> content
+  end
+
+  def generate_content([http_method, route, method_name, response_type | params], opts) do
+    if opts[:objc] do
+      generate_method(
+        :objc,
+        http_method, route, method_name, response_type, params
+      )
+    else
+      generate_method(http_method, route, method_name, response_type, params)
+    end
   end
 
   def append_file(content, path) do
