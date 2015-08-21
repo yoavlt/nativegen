@@ -48,7 +48,6 @@ defmodule Nativegen.Swift.MethodTest do
   test "generate a objective-c comatible method" do
     assert generate_method(
     :objc,
-    "requestSuccess",
     "post",
     "/users/register",
     "registerUser",
