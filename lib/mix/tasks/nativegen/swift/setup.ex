@@ -110,7 +110,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
       func requestSuccess(method: Alamofire.Method, routes: String, param: [String: AnyObject]?) -> Future<Bool, NSError> {
           let p = Promise<Bool, NSError>()
-          Alamofire.request(.POST, urlStr(routes), parameters: param)
+          Alamofire.request(method, urlStr(routes), parameters: param)
               .responseJSON { (req, res, json, err) in
                   if let statusCode = res?.statusCode {
                       if statusCode == 204 {
