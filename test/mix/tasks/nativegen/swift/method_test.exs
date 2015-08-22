@@ -116,7 +116,7 @@ defmodule Nativegen.Swift.MethodTest do
     
     public class User : NSObject, JsonModel {
         let username: String
-        var items: [Item]
+        var items: [Item]?
         public required init(json: JSON) {
             username = json["username"].stringValue
             if json["items"].error == nil {

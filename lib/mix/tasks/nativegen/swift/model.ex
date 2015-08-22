@@ -85,10 +85,10 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   def json_param(_atom, variable, type) when type in @swift_types,
   do: "let #{variable}: #{type}"
   def json_param(:array, variable, type),
-  do: "var #{variable}: #{type}"
+  do: "var #{variable}: #{type}?"
   def json_param(_atom, variable, type) do
-    "var #{variable}Id: Int\n    " <>
-    "var #{variable}: #{type}"
+    "var #{variable}Id: Int?\n    " <>
+    "var #{variable}: #{type}?"
   end
 
   def build_json_parser(params) when is_list(params) do

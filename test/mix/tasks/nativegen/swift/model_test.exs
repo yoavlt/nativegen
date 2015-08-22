@@ -12,9 +12,9 @@ defmodule Nativegen.Swift.ModelTest do
         let username: String
         let age: Int
         let battleNum: Int
-        var groupId: Int
-        var group: Group
-        var items: [Item]
+        var groupId: Int?
+        var group: Group?
+        var items: [Item]?
     """
   end
 
