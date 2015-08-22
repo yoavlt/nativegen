@@ -86,7 +86,7 @@ defmodule Nativegen.Swift.ModelTest do
         }
     }
     
-    public class UserRepository : NSObject, Repository {
+    public class UserRepository : Repository {
     
         public func create(username: String) -> Future<User, NSError> {
             return requestData(.POST, routes: "/api/users", param: ["username": username])
