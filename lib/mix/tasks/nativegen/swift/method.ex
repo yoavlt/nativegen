@@ -150,7 +150,13 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
 
   def request_method("Bool"), do: "requestSuccess"
   def request_method("Data"), do: "requestData"
-  def request_method(_), do: "request"
+  def request_method(response_type) do
+    if response_type =~ ~r/\[.+\]/ do
+      "requestArray"
+    else
+      "request"
+    end
+  end
 
   embed_template :method, """
       public func <%= @method_name %>(<%= @arg %>) -> Future<<%= @response_type %>, NSError> {

@@ -26,6 +26,17 @@ defmodule Nativegen.Swift.MethodTest do
             return request(.POST, routes: "/users/\\(userId)/show", param: nil)
         }
     """
+    assert generate_method(
+    "post",
+    "/users/:user_id/messages",
+    "fetchMessages",
+    "[Message]",
+    ["user_id:integer"]
+    ) == """
+        public func fetchMessages(userId: Int) -> Future<[Message], NSError> {
+            return requestArray(.POST, routes: "/users/\\(userId)/messages", param: nil)
+        }
+    """
   end
 
   test "generate requestSuccess method" do
@@ -163,6 +174,12 @@ defmodule Nativegen.Swift.MethodTest do
     refute content =~ "Future"
     content = generate_content(["post", "/users/:id/postMessage", "postMessage", "Bool", "message:string", "user:users"], nil)
     assert content =~ "Future"
+  end
+
+  test "request method" do
+    assert request_method("Bool") == "requestSuccess"
+    assert request_method("Data") == "requestData"
+    assert request_method("[Array]") == "requestArray"
   end
 
 end
