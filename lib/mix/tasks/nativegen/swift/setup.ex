@@ -183,7 +183,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                       p.failure(nserror)
                   } else {
                       if let errors = JSON(rawValue:json!)?["errors"] {
-                          p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
+                          p.failure(NSError(domain: errors.description, code: 101, userInfo: nil))
                           return
                       }
                       let arrayModel = JSON(rawValue: json!).map { T(json: $0) }
