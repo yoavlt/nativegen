@@ -78,11 +78,11 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                           p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
                           return
                       }
-                      let arrayModel = JSON(rawValue: json!).map { T(json: $0) }
-                      if arrayModel != nil {
-                          p.success(arrayModel!)
+                      if let resJson = JSON(rawValue: json!) {
+                          let model = T(json: resJson)
+                          p.success(model)
                       } else {
-                          p.failure(NSError(domain: "Repository Error", code: 100, userInfo: nil))
+                          p.failure(NSError(domain: "No data property", code: 100, userInfo: nil))
                       }
                   }
           }
@@ -115,6 +115,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           let p = Promise<Bool, NSError>()
           Alamofire.request(.POST, urlStr(routes), parameters: param)
               .responseJSON { (req, res, json, err) in
+                  if let statusCode = res?.statusCode {
+                      if statusCode == 204 {
+                          p.success(true)
+                          return
+                      }
+                  }
                   if let nserror = err {
                       p.failure(nserror)
                   } else {
@@ -182,15 +188,17 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   if let nserror = err {
                       p.failure(nserror)
                   } else {
-                      if let errors = JSON(rawValue:json!)?["errors"] {
-                          p.failure(NSError(domain: errors.description, code: 101, userInfo: nil))
-                          return
+                      if let errorJson = JSON(rawValue:json!)?["errors"] {
+                          if errorJson.error == nil {
+                              p.failure(NSError(domain: errorJson.description, code: 101, userInfo: nil))
+                              return
+                          }
                       }
-                      let arrayModel = JSON(rawValue: json!).map { T(json: $0) }
-                      if arrayModel != nil {
-                          p.success(arrayModel!)
+                      if let dataJson = JSON(rawValue: json!)?["data"] {
+                          let model = T(json: dataJson)
+                          p.success(model)
                       } else {
-                          p.failure(NSError(domain: "Repository Error", code: 100, userInfo: nil))
+                          p.failure(NSError(domain: "No data property", code: 100, userInfo: nil))
                       }
                   }
           }
