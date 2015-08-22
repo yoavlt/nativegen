@@ -18,7 +18,7 @@ You can add dependency to your project's `mix.exs`.
 ```:elixir
   defp deps do
     [
-      {:nativegen, "~> 0.2.4"}
+      {:nativegen, "~> 0.2.5"}
     ]
   end
 ```
@@ -49,8 +49,8 @@ public class User : NSObject, JsonModel {
     var items: [Item]
     public required init(json: JSON) {
         username = json["username"].stringValue
-        if let itemsJson = json["items"] {
-            items = itemsJson.arrayValue.map { Item(json: $0) }
+        if json["items"].error == nil {
+            items = json["items"].arrayValue.map { Item(json: $0) }
         }
     }
 }
@@ -58,7 +58,7 @@ public class User : NSObject, JsonModel {
 public class UserRepository : Repository {
 
     public func create(username: String) -> Future<User, NSError> {
-        return requestData(.POST, routes: "/api/users", param: ["username": username])
+        return requestData(.POST, routes: "/api/users", param: ["user": ["username": username]])
     }
 
     public func show(id: Int) -> Future<User, NSError> {
@@ -66,7 +66,7 @@ public class UserRepository : Repository {
     }
 
     public func update(id: Int, username: String) -> Future<User, NSError> {
-        return requestData(.PATCH, routes: "/api/users/\(id)", param: ["username": username])
+        return requestData(.PATCH, routes: "/api/users/\(id)", param: ["user": ["username": username]])
     }
 
     public func delete(id: Int) -> Future<Bool, NSError> {

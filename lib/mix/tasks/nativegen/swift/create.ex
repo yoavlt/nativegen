@@ -31,9 +31,9 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
 
     file_path = target_path(path, singular <> "Repository.swift")
     methods = if opts[:objc] do
-      default_methods(:objc_comp, plural, group, params, id_params)
+      default_methods(:objc_comp, singular, plural, group, params, id_params)
     else
-      default_methods(:swift, plural, group, params, id_params)
+      default_methods(:swift, singular, plural, group, params, id_params)
     end
 
     contents = concrete_repository_template(
@@ -49,21 +49,23 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
     create_file(file_path, contents)
   end
 
-  def default_methods(:swift, plural, group, params, id_params) do
+  def default_methods(:swift, singular, plural, group, params, id_params) do
     alias Mix.Tasks.Nativegen.Swift.Method
-    create_method = Method.generate_method(:data, "post", "/#{group}/#{plural}", "create", "User", build_create_args(params))
-    show_method   = Method.generate_method(:data, "get", "/#{group}/#{plural}/\\(id)", "show", "User", ["id:integer"])
-    update_method = Method.generate_method(:data, "patch", "/#{group}/#{plural}/\\(id)", "update", "User", id_params)
-    delete_method = Method.generate_method("delete", "/#{group}/#{plural}/\\(id)", "delete", "Bool", ["id:integer"])
+    opts = [method: "Data", key: String.downcase(singular)] 
+    create_method = Method.generate_swift_method("post", "/#{group}/#{plural}", "create", "User", build_create_args(params), opts)
+    show_method   = Method.generate_swift_method("get", "/#{group}/#{plural}/\\(id)", "show", "User", ["id:integer"], opts)
+    update_method = Method.generate_swift_method("patch", "/#{group}/#{plural}/\\(id)", "update", "User", id_params, opts)
+    delete_method = Method.generate_swift_method("delete", "/#{group}/#{plural}/\\(id)", "delete", "Bool", ["id:integer"])
     [create_method, show_method, update_method, delete_method] |> Enum.join("\n")
   end
 
-  def default_methods(:objc_comp, plural, group, params, id_params) do
+  def default_methods(:objc_comp, singular, plural, group, params, id_params) do
     alias Mix.Tasks.Nativegen.Swift.Method
-    create_method = Method.generate_method(:objc_data, "post", "/#{group}/#{plural}", "create", "User", build_create_args(params))
-    show_method   = Method.generate_method(:objc_data, "get", "/#{group}/#{plural}/\\(id)", "show", "User", ["id:integer"])
-    update_method = Method.generate_method(:objc_data, "patch", "/#{group}/#{plural}/\\(id)", "update", "User", id_params)
-    delete_method = Method.generate_method(:objc, "delete", "/#{group}/#{plural}/\\(id)", "delete", "Bool", ["id:integer"])
+    opts = [method: "Data", key: String.downcase(singular)] 
+    create_method = Method.generate_objc_method("post", "/#{group}/#{plural}", "create", "User", build_create_args(params), opts)
+    show_method   = Method.generate_objc_method("get", "/#{group}/#{plural}/\\(id)", "show", "User", ["id:integer"], opts)
+    update_method = Method.generate_objc_method("patch", "/#{group}/#{plural}/\\(id)", "update", "User", id_params, opts)
+    delete_method = Method.generate_objc_method("delete", "/#{group}/#{plural}/\\(id)", "delete", "Bool", ["id:integer"])
     [create_method, show_method, update_method, delete_method] |> Enum.join("\n")
   end
 

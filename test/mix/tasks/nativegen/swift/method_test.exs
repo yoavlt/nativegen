@@ -4,7 +4,7 @@ defmodule Nativegen.Swift.MethodTest do
   import Mix.Tasks.Nativegen.Swift.Method
 
   test "generate method test" do
-    assert generate_method(
+    assert generate_swift_method(
     "post",
     "/users/create",
     "createUser",
@@ -15,7 +15,7 @@ defmodule Nativegen.Swift.MethodTest do
             return request(.POST, routes: "/users/create", param: ["username": username, "age": age])
         }
     """
-    assert generate_method(
+    assert generate_swift_method(
     "post",
     "/users/:user_id/show",
     "showUser",
@@ -26,7 +26,7 @@ defmodule Nativegen.Swift.MethodTest do
             return request(.POST, routes: "/users/\\(userId)/show", param: nil)
         }
     """
-    assert generate_method(
+    assert generate_swift_method(
     "post",
     "/users/:user_id/messages",
     "fetchMessages",
@@ -40,7 +40,7 @@ defmodule Nativegen.Swift.MethodTest do
   end
 
   test "generate requestSuccess method" do
-    assert generate_method(
+    assert generate_swift_method(
     "delete",
     "/users/delete",
     "deleteUser",
@@ -54,7 +54,7 @@ defmodule Nativegen.Swift.MethodTest do
   end
 
   test "generate a method with datetime parameter" do
-    assert generate_method(
+    assert generate_swift_method(
     "post",
     "/users/register",
     "registerUser",
@@ -68,8 +68,7 @@ defmodule Nativegen.Swift.MethodTest do
   end
 
   test "generate a objective-c comatible method" do
-    assert generate_method(
-    :objc,
+    assert generate_objc_method(
     "post",
     "/users/register",
     "registerUser",
@@ -85,8 +84,7 @@ defmodule Nativegen.Swift.MethodTest do
   end
 
   test "generate a objective-c comatible data method" do
-    assert generate_method(
-    :objc_data,
+    assert generate_objc_method(
     "post",
     "/users/show/:id",
     "registerUser",
@@ -94,7 +92,7 @@ defmodule Nativegen.Swift.MethodTest do
     ["username:string", "registered_at:datetime", "join_date:date"]
     ) == """
         public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate, onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
-            requestData(.POST, routes: "/users/show/\\(id)", param: ["username": username, "registered_at": toDateTimeObj(registeredAt), "join_date": toDateObj(joinDate)])
+            requestSuccess(.POST, routes: "/users/show/\\(id)", param: ["username": username, "registered_at": toDateTimeObj(registeredAt), "join_date": toDateObj(joinDate)])
                 .onSuccess { data in onSuccess(data) }
                 .onFailure { error in onError(error) }
         }
@@ -104,7 +102,7 @@ defmodule Nativegen.Swift.MethodTest do
   test "append method content" do
     alias Mix.Tasks.Nativegen.Swift.Create
     Create.run(["test_generate_directory/test", "User", "users", "username:string", "items:array:Item"])
-    content = generate_method("post", "/users/buy", "buyItem", "Bool", ["item_id:integer"])
+    content = generate_swift_method("post", "/users/buy", "buyItem", "Bool", ["item_id:integer"])
     file_name = "test_generate_directory/test/UserRepository.swift"
     append_file(content, file_name)
 
@@ -128,7 +126,7 @@ defmodule Nativegen.Swift.MethodTest do
     public class UserRepository : Repository {
     
         public func create(username: String) -> Future<User, NSError> {
-            return requestData(.POST, routes: "/api/users", param: ["username": username])
+            return requestData(.POST, routes: "/api/users", param: ["user": ["username": username]])
         }
     
         public func show(id: Int) -> Future<User, NSError> {
@@ -136,7 +134,7 @@ defmodule Nativegen.Swift.MethodTest do
         }
     
         public func update(id: Int, username: String, items: [Item]) -> Future<User, NSError> {
-            return requestData(.PATCH, routes: "/api/users/\\(id)", param: ["username": username])
+            return requestData(.PATCH, routes: "/api/users/\\(id)", param: ["user": ["username": username]])
         }
     
         public func delete(id: Int) -> Future<Bool, NSError> {

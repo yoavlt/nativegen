@@ -86,11 +86,19 @@ defmodule Mix.Tasks.Nativegen.Swift do
   def arg(:array, variable, type), do: "#{variable}: #{type}"
   def arg(atom, variable, type), do: "#{variable}Id: Int"
 
-  def wrap_array(param_str) do
+  def wrap_dict(param_str, nil) do
     case param_str do
       ""  -> "nil"
       par -> "[#{par}]"
     end
+  end
+
+  def wrap_dict(param_str, key) do
+    case param_str do
+      ""  -> "nil"
+      par -> "[\"#{key}\": #{wrap_dict(par, nil)}]"
+    end
+    
   end
 
   @doc """

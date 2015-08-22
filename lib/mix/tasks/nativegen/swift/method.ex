@@ -16,7 +16,6 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
 
   def run(args) do
     {opts, args, _} = OptionParser.parse(args, file: :string, objc: :boolean)
-    # [http_method, route, method_name, response_type | params] = args
 
     content = generate_content(args, opts)
     case opts[:file] do
@@ -37,12 +36,11 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
 
   def generate_content([http_method, route, method_name, response_type | params], opts) do
     if opts[:objc] do
-      generate_method(
-        :objc,
+      generate_objc_method(
         http_method, route, method_name, response_type, params
       )
     else
-      generate_method(http_method, route, method_name, response_type, params)
+      generate_swift_method(http_method, route, method_name, response_type, params)
     end
   end
 
@@ -59,26 +57,16 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     end
   end
 
-  def generate_method(:data, http_method, route, method_name, response_type, params) when is_list(params) do
-    generate_method(request_method("Data"), http_method, route, method_name, response_type, params)
+  def generate_objc_method(http_method, route, method_name, response_type, params, opts \\ [])
+
+  def generate_objc_method(http_method, route, method_name, response_type, params, opts) when is_list(params) do
+    method = request_method(Keyword.get(opts, :method) || response_type)
+    generate_objc_method(method, http_method, route, method_name, response_type, params, opts)
   end
 
-  def generate_method(:objc_data, http_method, route, method_name, response_type, params) when is_list(params) do
-    generate_method(:objc, request_method("Data"), http_method, route, method_name, response_type, params)
-  end
-
-  def generate_method(:objc, http_method, route, method_name, response_type, params) when is_list(params) do
-    generate_method(:objc, request_method(response_type), http_method, route, method_name, response_type, params)
-  end
-
-  def generate_method(:objc, request_method, http_method, route, method_name, response_type, params) when is_list(params) do
+  def generate_objc_method(request_method, http_method, route, method_name, response_type, params, opts) when is_list(params) do
     http_method = http_method |> String.to_atom |> to_swift_method
-    route_params = extract_params(route)
-    param = params
-            |> parse_params
-            |> Enum.reject(&(is_include?(&1, route_params)))
-            |> generate_params
-            |> wrap_array
+    param = arg_param(params, route, opts)
     arg = params |> parse_params |> default_args
 
     objc_method_template(
@@ -92,18 +80,15 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     )
   end
 
-  def generate_method(http_method, route, method_name, response_type, params) when is_list(params) do
-    generate_method(request_method(response_type), http_method, route, method_name, response_type, params)
+  def generate_swift_method(http_method, route, method_name, response_type, params, opts \\ [])
+  def generate_swift_method(http_method, route, method_name, response_type, params, opts) when is_list(params) do
+    method = request_method(Keyword.get(opts, :method) || response_type)
+    generate_swift_method(method, http_method, route, method_name, response_type, params, opts)
   end
 
-  def generate_method(request_method, http_method, route, method_name, response_type, params) when is_list(params) do
+  def generate_swift_method(request_method, http_method, route, method_name, response_type, params, opts) when is_list(params) do
     http_method = http_method |> String.to_atom |> to_swift_method
-    route_params = extract_params(route)
-    param = params
-            |> parse_params
-            |> Enum.reject(&(is_include?(&1, route_params)))
-            |> generate_params
-            |> wrap_array
+    param = arg_param(params, route, opts)
     arg = params |> parse_params |> default_args
 
     content = method_template(
@@ -115,6 +100,15 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     http_method: http_method,
     route: replace_param(route)
     )
+  end
+
+  def arg_param(params, route, opts) do
+    route_params = extract_params(route)
+    params
+    |> parse_params
+    |> Enum.reject(&(is_include?(&1, route_params)))
+    |> generate_params
+    |> wrap_dict(Keyword.get(opts, :key))
   end
 
   def is_include?({_, var, _}, params), do: var in params
