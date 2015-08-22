@@ -44,7 +44,7 @@ import BrightFutures
 import Alamofire
 import SwiftyJSON
 
-public class User : JsonModel {
+public class User : NSObject, JsonModel {
     let username: String
     var items: [Item]
     public required init(json: JSON) {
@@ -55,7 +55,7 @@ public class User : JsonModel {
     }
 }
 
-public class UserRepository : Repository {
+public class UserRepository : NSObject, Repository {
 
     public func create(username: String) -> Future<User, NSError> {
         return requestData(.POST, routes: "/api/users", param: ["username": username])
