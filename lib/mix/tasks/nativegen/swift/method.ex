@@ -93,7 +93,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
 
   def generate_method(request_method, http_method, route, method_name, response_type, params) when is_list(params) do
     http_method = http_method |> String.to_atom |> to_swift_method
-    param = params |> parse_params |> generate_params |> wrap_array
+    route_params = extract_params(route)
+    param = params
+            |> parse_params
+            |> Enum.reject(&(is_include?(&1, route_params)))
+            |> generate_params
+            |> wrap_array
     arg = params |> parse_params |> default_args
 
     content = method_template(
@@ -107,12 +112,23 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     )
   end
 
+  def is_include?({_, var, _}, params), do: var in params
+
   def replace_param(method_name) do
     case extract_param(method_name) do
       nil -> method_name
       %{"param" => param} ->
         next = String.replace(method_name, ":" <> param, "\\(#{to_camel_case(param)})")
         replace_param(next)
+    end
+  end
+
+  def extract_params(method_name, params \\ []) do
+    case extract_param(method_name) do
+      nil -> params
+      %{"param" => param} ->
+        next = String.replace(method_name, ":" <> param, "\\(#{to_camel_case(param)})")
+        extract_params(next, [param | params])
     end
   end
 

@@ -15,6 +15,17 @@ defmodule Nativegen.Swift.MethodTest do
             return request(.POST, routes: "/users/create", param: ["username": username, "age": age])
         }
     """
+    assert generate_method(
+    "post",
+    "/users/:user_id/show",
+    "showUser",
+    "User",
+    ["user_id:integer"]
+    ) == """
+        public func showUser(userId: Int) -> Future<User, NSError> {
+            return request(.POST, routes: "/users/\\(userId)/show", param: nil)
+        }
+    """
   end
 
   test "generate requestSuccess method" do
@@ -133,6 +144,11 @@ defmodule Nativegen.Swift.MethodTest do
   test "extract parameter" do
     assert extract_param("/users/:id/show") == %{"param" => "id"}
     assert extract_param("/users/:id") == %{"param" => "id"}
+  end
+
+  test "extract parameters" do
+    assert extract_params("/users/:id/show") == ["id"]
+    assert extract_params("/users/:id/show/:hoge") == ["hoge", "id"]
   end
 
   test "replace parmeter in router" do
