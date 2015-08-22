@@ -138,6 +138,8 @@ defmodule Nativegen.Swift.MethodTest do
   test "replace parmeter in router" do
     method_name = "/users/:id/show/:hoge"
     assert replace_param(method_name) == "/users/\\(id)/show/\\(hoge)"
+    method_name = "/users/:user_id/show"
+    assert replace_param(method_name) == "/users/\\(userId)/show"
   end
 
   test "generate content" do

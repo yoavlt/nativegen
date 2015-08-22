@@ -111,7 +111,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     case extract_param(method_name) do
       nil -> method_name
       %{"param" => param} ->
-        next = String.replace(method_name, ":" <> param, "\\(#{param})")
+        next = String.replace(method_name, ":" <> param, "\\(#{to_camel_case(param)})")
         replace_param(next)
     end
   end
