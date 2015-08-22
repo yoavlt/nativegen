@@ -147,17 +147,17 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   def json_parse_method(type), do: String.downcase(type) <> "Value"
 
   embed_template :custom_json_parser, """
-          if let <%= @camel_var %>IdJson = json["<%= @var %>_id"] {
-              <%= @camel_var %>Id = <%= @camel_var %>IdJson.intValue
+          if json["<%= @var %>_id"].error == nil {
+              <%= @camel_var %>Id = json["<%= @var %>_id"].int
           }
-          if let <%= @camel_var %>Json = json["<%= @var %>"] {
-              <%= @camel_var %> = <%= @type %>(json: <%= @camel_var %>Json)
+          if json["<%= @var %>"].error == nil {
+              <%= @camel_var %> = <%= @type %>(json: json["<%= @var %>"])
           }
   """
 
   embed_template :array_json_parser, """
-          if let <%= @camel_var %>Json = json["<%= @var %>"] {
-              <%= @camel_var %> = <%= @camel_var %>Json.arrayValue.map { <%= @type_parser %> }
+          if json["<%= @var %>"].error == nil {
+              <%= @camel_var %> = json["<%= @var %>"].arrayValue.map { <%= @type_parser %> }
           }
   """
 

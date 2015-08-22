@@ -26,14 +26,14 @@ defmodule Nativegen.Swift.ModelTest do
             username = json["username"].stringValue
             age = json["age"].intValue
             battleNum = json["battle_num"].intValue
-            if let groupIdJson = json["group_id"] {
-                groupId = groupIdJson.intValue
+            if json["group_id"].error == nil {
+                groupId = json["group_id"].int
             }
-            if let groupJson = json["group"] {
-                group = Group(json: groupJson)
+            if json["group"].error == nil {
+                group = Group(json: json["group"])
             }
-            if let itemsJson = json["items"] {
-                items = itemsJson.arrayValue.map { Item(json: $0) }
+            if json["items"].error == nil {
+                items = json["items"].arrayValue.map { Item(json: $0) }
             }
     """
   end

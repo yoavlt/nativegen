@@ -119,8 +119,8 @@ defmodule Nativegen.Swift.MethodTest do
         var items: [Item]
         public required init(json: JSON) {
             username = json["username"].stringValue
-            if let itemsJson = json["items"] {
-                items = itemsJson.arrayValue.map { Item(json: $0) }
+            if json["items"].error == nil {
+                items = json["items"].arrayValue.map { Item(json: $0) }
             }
         }
     }
