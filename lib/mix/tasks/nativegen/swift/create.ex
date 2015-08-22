@@ -86,7 +86,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
 
   <%= @json_model %>
 
-  public class <%= @singular %>Repository : NSObject, Repository {
+  public class <%= @singular %>Repository : Repository {
 
   <%= @methods %>
   }
