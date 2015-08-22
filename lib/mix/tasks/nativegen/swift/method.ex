@@ -73,7 +73,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
 
   def generate_method(:objc, request_method, http_method, route, method_name, response_type, params) when is_list(params) do
     http_method = http_method |> String.to_atom |> to_swift_method
-    param = params |> parse_params |> generate_params |> wrap_array
+    route_params = extract_params(route)
+    param = params
+            |> parse_params
+            |> Enum.reject(&(is_include?(&1, route_params)))
+            |> generate_params
+            |> wrap_array
     arg = params |> parse_params |> default_args
 
     objc_method_template(
