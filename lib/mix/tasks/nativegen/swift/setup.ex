@@ -55,9 +55,6 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
   public class Repository : NSObject {
       let host = "<%= @host %>"
-      public init() {
-
-      }
 
       func urlStr(routes: String) -> String {
           return host + routes
