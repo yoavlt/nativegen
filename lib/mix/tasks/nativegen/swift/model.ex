@@ -121,7 +121,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   do: "#{type}(json: $0)"
 
   def json_parser(type, variable) when type in [:datetime, :date],
-  do: "Repository.parseDate(json[\"#{variable}\"]!)"
+  do: "Repository.parseDate(json[\"#{variable}\"])"
 
   def json_parser(type, var) when is_atom(type) do
     class_name = type |> Atom.to_string |> String.capitalize
