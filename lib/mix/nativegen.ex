@@ -32,11 +32,15 @@ defmodule Mix.Nativegen do
   Transform variable or method to lower camel case.
   """
   def to_camel_case(word) do
-    [head | tail] = word |> String.split("_")
-    capitalized = tail
-                  |> Enum.map(&String.capitalize/1)
-                  |> Enum.join("")
-    head <> capitalized
+    if word =~ ~r/[A-Z]/ do
+      word
+    else
+      [head | tail] = word |> String.split("_")
+      capitalized = tail
+                    |> Enum.map(&String.capitalize/1)
+                    |> Enum.join("")
+      head <> capitalized
+    end
   end
 
   @doc """

@@ -98,7 +98,6 @@ defmodule Mix.Tasks.Nativegen.Swift do
       ""  -> "nil"
       par -> "[\"#{key}\": #{wrap_dict(par, nil)}]"
     end
-    
   end
 
   @doc """
