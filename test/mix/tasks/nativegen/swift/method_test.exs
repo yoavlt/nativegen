@@ -172,6 +172,9 @@ defmodule Nativegen.Swift.MethodTest do
     refute content =~ "Future"
     content = generate_content(["post", "/users/:id/postMessage", "postMessage", "Bool", "message:string", "user:users"], nil)
     assert content =~ "Future"
+
+    content = generate_content(["post", "/users/:id/postMessage", "postMessage", "Bool", "message:string", "user:users"], [group: :api])
+    assert content =~ "/api/users/"
   end
 
   test "request method" do

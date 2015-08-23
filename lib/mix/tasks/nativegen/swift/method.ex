@@ -15,7 +15,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   """
 
   def run(args) do
-    {opts, args, _} = OptionParser.parse(args, file: :string, objc: :boolean)
+    {opts, args, _} = OptionParser.parse(args, file: :string, objc: :boolean, group: :string)
 
     content = generate_content(args, opts)
     case opts[:file] do
@@ -35,6 +35,9 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   end
 
   def generate_content([http_method, route, method_name, response_type | params], opts) do
+    if opts[:group] do
+      route = "/#{opts[:group]}#{route}"
+    end
     if opts[:objc] do
       generate_objc_method(
         http_method, route, method_name, response_type, params
@@ -117,7 +120,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     case extract_param(method_name) do
       nil -> method_name
       %{"param" => param} ->
-        next = String.replace(method_name, ":" <> param, "\\(#{to_camel_case(param)})")
+       next = String.replace(method_name, ":" <> param, "\\(#{to_camel_case(param)})")
         replace_param(next)
     end
   end
