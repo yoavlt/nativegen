@@ -18,7 +18,7 @@ You can add dependency to your project's `mix.exs`.
 ```:elixir
   defp deps do
     [
-      {:nativegen, "~> 0.2.5"}
+      {:nativegen, "~> 0.2.6"}
     ]
   end
 ```
