@@ -113,9 +113,11 @@ defmodule Nativegen.Swift.MethodTest do
     import SwiftyJSON
     
     public class User : NSObject, JsonModel {
+        var id: Int?
         let username: String
         var items: [Item]?
         public required init(json: JSON) {
+            id = json["id"].int
             username = json["username"].stringValue
             if json["items"].error == nil {
                 items = json["items"].arrayValue.map { Item(json: $0) }

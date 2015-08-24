@@ -8,7 +8,7 @@ defmodule Nativegen.Swift.ModelTest do
   test "build json params" do
     params = Mix.Nativegen.parse_params(@valid_params)
     assert build_json_params(params) <> "\n" == ~S"""
-        let id: Int
+        var id: Int?
         let username: String
         let age: Int
         let battleNum: Int
@@ -22,7 +22,7 @@ defmodule Nativegen.Swift.ModelTest do
     params = Mix.Nativegen.parse_params(@valid_params)
     parser = build_json_parser(params)
     assert parser <> "\n" == ~S"""
-            id = json["id"].intValue
+            id = json["id"].int
             username = json["username"].stringValue
             age = json["age"].intValue
             battleNum = json["battle_num"].intValue
@@ -43,11 +43,13 @@ defmodule Nativegen.Swift.ModelTest do
     "User",
     ["username:string", "age:integer", "first_name:string", "last_name:string"]) === """
     public class User : NSObject, JsonModel {
+        var id: Int?
         let username: String
         let age: Int
         let firstName: String
         let lastName: String
         public required init(json: JSON) {
+            id = json["id"].int
             username = json["username"].stringValue
             age = json["age"].intValue
             firstName = json["first_name"].stringValue
@@ -71,16 +73,20 @@ defmodule Nativegen.Swift.ModelTest do
     import SwiftyJSON
     
     public class User : NSObject, JsonModel {
+        var id: Int?
         let username: String
         public required init(json: JSON) {
+            id = json["id"].int
             username = json["username"].stringValue
         }
     }
     
     public class Item : NSObject, JsonModel {
+        var id: Int?
         let name: String
         let strength: Float
         public required init(json: JSON) {
+            id = json["id"].int
             name = json["name"].stringValue
             strength = json["strength"].floatValue
         }

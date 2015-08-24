@@ -62,7 +62,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   Generate json model from name and params
   """
   def generate_json_model(singular, params) when is_list(params) do
-    parsed = parse_params(params)
+    parsed = parse_params(["id:integer"] ++ params)
     json_params = parsed |> build_json_params
     json_parser = parsed |> build_json_parser
     json_model_template(
@@ -82,6 +82,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
     |> Enum.join("\n")
   end
 
+  def json_param(:integer, "id", type), do: "var id: #{type}?"
   def json_param(_atom, variable, type) when type in @swift_types,
   do: "let #{variable}: #{type}"
   def json_param(:array, variable, type),
@@ -104,6 +105,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
     |> Enum.join("\n")
   end
 
+  def json_parser(:integer, "id"), do: "json[\"id\"].int"
   def json_parser(type, variable) when type in [:string, :text, :uuid, :boolean, :integer, :float, :double, :decimal] do
     swift_type = to_swift_type(type)
     "json[\"#{variable}\"].#{json_parse_method(swift_type)}"
