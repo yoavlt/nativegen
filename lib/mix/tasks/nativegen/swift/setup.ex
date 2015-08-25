@@ -214,6 +214,73 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return p.future
       }
 
+    func multipartFormData<T : JsonModel>(routes: String, multipart: Alamofire.MultipartFormData -> ()) -> Future<T, NSError> {
+        let p = Promise<T, NSError>()
+
+        Alamofire.upload(.POST, URLString: urlStr(routes), multipartFormData: multipart,
+            encodingCompletion: { encodingResult in
+                switch encodingResult {
+                case .Success(let upload, _, _):
+                    upload.responseJSON { (req, res, json, err) in
+                        if let nserror = err {
+                            p.failure(nserror)
+                        } else {
+                            if let errors = JSON(rawValue:json!)?["errors"] {
+                                p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
+                                return
+                            }
+                            if let resJson = JSON(rawValue: json!) {
+                                let model = T(json: resJson)
+                                p.success(model)
+                            } else {
+                                p.failure(NSError(domain: "No data property", code: 100, userInfo: nil))
+                            }
+                        }
+                    }
+                case .Failure(let encodingError):
+                    p.failure(encodingError)
+                }
+        })
+
+        return p.future
+    }
+
+    func multipartFormDataSuccess(routes: String, multipart: Alamofire.MultipartFormData -> ()) -> Future<Bool, NSError> {
+        let p = Promise<Bool, NSError>()
+
+        Alamofire.upload(.POST, URLString: urlStr(routes), multipartFormData: multipart,
+            encodingCompletion: { encodingResult in
+                switch encodingResult {
+                case .Success(let upload, _, _):
+                    upload.responseJSON { (req, res, json, err) in
+                        if let statusCode = res?.statusCode {
+                            if statusCode == 204 {
+                                p.success(true)
+                                return
+                            }
+                        }
+                        if let nserror = err {
+                            p.failure(nserror)
+                        } else {
+                            if let errors = JSON(rawValue:json!)?["errors"] {
+                                p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
+                                return
+                            }
+                            if let success = JSON(json!)["success"].bool {
+                                p.success(success)
+                            } else {
+                                p.failure(NSError(domain: "request success error", code: 0, userInfo: nil))
+                            }
+                        }
+                    }
+                case .Failure(let encodingError):
+                    p.failure(encodingError)
+                }
+        })
+
+        return p.future
+    }
+
       static func parseDate(year:Int, month:Int, day:Int) -> NSDate {
           var c = NSDateComponents()
           c.year = year
