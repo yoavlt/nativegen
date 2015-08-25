@@ -143,6 +143,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   f(ratio)
               }
               .responseJSON { _, _, json, error in
+                  if let statusCode = res?.statusCode {
+                      if statusCode == 204 {
+                          p.success(true)
+                          return
+                      }
+                  }
                   if let nserror = error {
                       p.failure(nserror)
                   } else {
@@ -164,6 +170,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   f(ratio)
               }
               .responseJSON { _, _, json, error in
+                  if let statusCode = res?.statusCode {
+                      if statusCode == 204 {
+                          p.success(true)
+                          return
+                      }
+                  }
                   if let nserror = error {
                       p.failure(nserror)
                   } else {
