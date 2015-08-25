@@ -142,7 +142,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
                   f(ratio)
               }
-              .responseJSON { _, _, json, error in
+              .responseJSON { _, res, json, error in
                   if let statusCode = res?.statusCode {
                       if statusCode == 204 {
                           p.success(true)
@@ -169,7 +169,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
                   f(ratio)
               }
-              .responseJSON { _, _, json, error in
+              .responseJSON { _, res, json, error in
                   if let statusCode = res?.statusCode {
                       if statusCode == 204 {
                           p.success(true)
