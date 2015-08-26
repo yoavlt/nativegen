@@ -150,6 +150,8 @@ defmodule Nativegen.Swift.MethodTest do
     }
     """
     File.rm_rf "test_generate_directory"
+
+    assert_raise Mix.Error, fn -> append_file(content, file_name) end
   end
 
   test "extract parameter" do
