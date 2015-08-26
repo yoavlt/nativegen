@@ -155,6 +155,15 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     end
   end
 
+  def multipart_request_method("Bool"), do: "multipartFormDataSuccess"
+  def multipart_request_method(response_type) do
+    if response_type =~ ~r/\[.+\]/ do
+      "multipartFormArray"
+    else
+      "multipartFormData"
+    end
+  end
+
   embed_template :method, """
       public func <%= @method_name %>(<%= @arg %>) -> Future<<%= @response_type %>, NSError> {
           return <%= @request_method %>(<%= @http_method %>, routes: "<%= @route %>", param: <%= @param %>)
@@ -166,6 +175,23 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
           <%= @request_method %>(<%= @http_method %>, routes: "<%= @route %>", param: <%= @param %>)
               .onSuccess { data in onSuccess(data) }
               .onFailure { error in onError(error) }
+      }
+  """
+
+  embed_template :multpart, """
+      public func <%= @method_name %>(<%= @arg %>multipart: (Alamofire.MultipartFormData) -> ()) -> Future<<%= @response_type %>, NSError> {
+          return <%= @request_name %>("<%= @route %>", multipart: multipart)
+      }
+  """
+
+  embed_template :objc_multipart, """
+      public func <%= @method_name %>(data: [String : AnyObject], <%= @arg %>onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
+          <%= @method_name %>("<%= @route %>") { multipart in
+              for (fileName, appendable) in data {
+                  self.parseMultipartForm(appendable, fileName: fileName, multipart: multipart)
+              }
+          }.onSuccess { data in onSuccess(data) }
+           .onFailure { err in onError(err) }
       }
   """
 

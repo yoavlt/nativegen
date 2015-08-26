@@ -185,4 +185,11 @@ defmodule Nativegen.Swift.MethodTest do
     assert request_method("[Array]") == "requestArray"
   end
 
+  test "multipart request methods" do
+    assert multipart_request_method("Bool") == "multipartFormDataSuccess"
+    assert multipart_request_method("Data") == "multipartFormData"
+    assert multipart_request_method("[User]") == "multipartFormArray"
+    assert multipart_request_method("User") == "multipartFormData"
+  end
+
 end

@@ -245,6 +245,36 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return p.future
       }
 
+      func multipartFormArray<[T] : JsonModel>(routes: String, multipart: Alamofire.MultipartFormData -> ()) -> Future<[T], NSError> {
+          let p = Promise<T, NSError>()
+
+          Alamofire.upload(.POST, URLString: urlStr(routes), multipartFormData: multipart,
+              encodingCompletion: { encodingResult in
+                  switch encodingResult {
+                  case .Success(let upload, _, _):
+                      upload.responseJSON { (req, res, json, err) in
+                      if let nserror = err {
+                          p.failure(nserror)
+                      } else {
+                          if let errors = JSON(rawValue:json!)?["errors"] {
+                              p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
+                              return
+                          }
+                          let arrayModel = JSON(json!).array?.map { T(json: $0) }
+                          if arrayModel != nil {
+                              p.success(arrayModel!)
+                          } else {
+                              p.success([])
+                          }
+                      }
+                  case .Failure(let encodingError):
+                      p.failure(encodingError)
+                  }
+          })
+
+          return p.future
+      }
+
       func multipartFormDataSuccess(routes: String, multipart: Alamofire.MultipartFormData -> ()) -> Future<Bool, NSError> {
           let p = Promise<Bool, NSError>()
 
@@ -279,6 +309,15 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           })
 
           return p.future
+      }
+
+      func parseMultipartForm(appendable: NSObject, fileName: String, multipart: Alamofire.MultipartFormData) {
+          if let data = appendable as? NSData {
+              multipart.appendBodyPart(data: data, name: fileName)
+          }
+          if let url = appendable as? NSURL {
+              multipart.appendBodyPart(fileURL: url, name: fileName)
+          }
       }
 
       static func parseDate(year:Int, month:Int, day:Int) -> NSDate {
