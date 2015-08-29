@@ -94,18 +94,21 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     param = arg_param(params, route, opts)
     arg = params |> parse_params |> default_args
 
-    content = method_template(
-    method_name: method_name,
-    param: param,
-    arg: arg,
-    response_type: response_type,
-    request_method: request_method,
-    http_method: http_method,
-    route: replace_param(route)
+    method_template(
+      method_name: method_name,
+      param: param,
+      arg: arg,
+      response_type: response_type,
+      request_method: request_method,
+      http_method: http_method,
+      route: replace_param(route)
     )
   end
 
-  def generate_multipart_method(request_method, route, method_name, response_type) do
+  @doc """
+  Generate multipart form data method which is callable from swift
+  """
+  def generate_multipart_method(route, method_name, response_type) do
     arg = extract_params(route) |> Enum.map(fn par ->
       par <> ": Int, "
     end)
@@ -113,11 +116,33 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
       method_name: method_name,
       arg: arg,
       response_type: response_type,
-      request_method: request_method,
+      request_method: multipart_request_method(response_type),
       route: replace_param(route)
     )
   end
 
+  @doc """
+  Generate multipart form data method which is callable from swift and Objective-C
+  """
+  def generate_multipart_objc_method(route, method_name, response_type) do
+    arg = extract_params(route) |> Enum.map(fn par ->
+      par <> ": Int, "
+    end)
+    objc_multipart_template(
+      method_name: method_name,
+      arg: arg,
+      response_type: response_type,
+      request_method: multipart_request_method(response_type),
+      route: replace_param(route)
+    )
+  end
+
+  @doc """
+  Return arguments parameter of request method
+  Example:
+  iex> arg_param(["id:integer", "username:string"], "/users/:id/register", [])
+  "[\"username\": username]"
+  """
   def arg_param(params, route, opts) do
     route_params = extract_params(route)
     params
@@ -211,7 +236,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
 
   embed_template :objc_multipart, """
       public func <%= @method_name %>(data: [String : AnyObject], <%= @arg %>onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
-          <%= @method_name %>("<%= @route %>") { multipart in
+          <%= @request_method %>("<%= @route %>") { multipart in
               for (fileName, appendable) in data {
                   self.parseMultipartForm(appendable, fileName: fileName, multipart: multipart)
               }

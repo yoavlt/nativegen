@@ -195,14 +195,27 @@ defmodule Nativegen.Swift.MethodTest do
   end
 
   test "generate multipart method" do
-    assert generate_multipart_method("requestSuccess", "/users/:id/register", "registerUser", "Bool") == """
+    assert generate_multipart_method("/users/:id/register", "registerUser", "Bool") == """
         public func registerUser(id: Int, multipart: (Alamofire.MultipartFormData) -> ()) -> Future<Bool, NSError> {
-            return requestSuccess(\"/users/\\(id)/register\", multipart: multipart)
+            return multipartFormDataSuccess(\"/users/\\(id)/register\", multipart: multipart)
         }
     """
-    assert generate_multipart_method("request", "/users/:id/register", "registerUser", "User") == """
+    assert generate_multipart_method("/users/:id/register", "registerUser", "User") == """
         public func registerUser(id: Int, multipart: (Alamofire.MultipartFormData) -> ()) -> Future<User, NSError> {
-            return request(\"/users/\\(id)/register\", multipart: multipart)
+            return multipartFormData(\"/users/\\(id)/register\", multipart: multipart)
+        }
+    """
+  end
+
+  test "generate multipart method which is Objective-C compatible" do
+    assert generate_multipart_objc_method("/users/:id/register", "userRegister", "Bool") == """
+        public func userRegister(data: [String : AnyObject], id: Int, onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
+            multipartFormDataSuccess(\"/users/\\(id)/register\") { multipart in
+                for (fileName, appendable) in data {
+                    self.parseMultipartForm(appendable, fileName: fileName, multipart: multipart)
+                }
+            }.onSuccess { data in onSuccess(data) }
+             .onFailure { err in onError(err) }
         }
     """
   end
