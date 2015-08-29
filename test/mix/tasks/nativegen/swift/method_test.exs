@@ -194,4 +194,12 @@ defmodule Nativegen.Swift.MethodTest do
     assert multipart_request_method("User") == "multipartFormData"
   end
 
+  test "generate multipart method" do
+    assert generate_multipart_method("requestSuccess", "/users/:id/register", "registerUser", "Bool") == """
+        public func registerUser(id: Int, multipart: (Alamofire.MultipartFormData) -> ()) -> Future<Bool, NSError> {
+            return (\"/users/\\(id)/register\", multipart: multipart)
+        }
+    """
+  end
+
 end

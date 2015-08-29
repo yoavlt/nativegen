@@ -105,6 +105,19 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     )
   end
 
+  def generate_multipart_method(request_method, route, method_name, response_type) do
+    arg = extract_params(route) |> Enum.map(fn par ->
+      par <> ": Int, "
+    end)
+    multipart_template(
+      method_name: method_name,
+      arg: arg,
+      response_type: response_type,
+      request_method: request_method,
+      route: replace_param(route)
+    )
+  end
+
   def arg_param(params, route, opts) do
     route_params = extract_params(route)
     params
@@ -116,15 +129,27 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
 
   def is_include?({_, var, _}, params), do: var in params
 
+  @doc """
+  Replace parameters of route with swift syntax
+  Example:
+  iex> replace_param("/users/:id/hoge")
+  "/users/\\(id)/hoge"
+  """
   def replace_param(method_name) do
     case extract_param(method_name) do
       nil -> method_name
       %{"param" => param} ->
-       next = String.replace(method_name, ":" <> param, "\\(#{to_camel_case(param)})")
+        next = String.replace(method_name, ":" <> param, "\\(#{to_camel_case(param)})")
         replace_param(next)
     end
   end
 
+  @doc """
+  Extract parameters from route
+  Example:
+  iex> extract_params("/users/:id/register")
+       ["id"]
+  """
   def extract_params(method_name, params \\ []) do
     case extract_param(method_name) do
       nil -> params
@@ -178,7 +203,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
       }
   """
 
-  embed_template :multpart, """
+  embed_template :multipart, """
       public func <%= @method_name %>(<%= @arg %>multipart: (Alamofire.MultipartFormData) -> ()) -> Future<<%= @response_type %>, NSError> {
           return <%= @request_name %>("<%= @route %>", multipart: multipart)
       }
