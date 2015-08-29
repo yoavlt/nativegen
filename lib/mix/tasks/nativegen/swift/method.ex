@@ -205,7 +205,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
 
   embed_template :multipart, """
       public func <%= @method_name %>(<%= @arg %>multipart: (Alamofire.MultipartFormData) -> ()) -> Future<<%= @response_type %>, NSError> {
-          return <%= @request_name %>("<%= @route %>", multipart: multipart)
+          return <%= @request_method %>("<%= @route %>", multipart: multipart)
       }
   """
 
