@@ -50,7 +50,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
           http_method, route, method_name, response_type, params
         )
       {true, true} ->
-        generate_multipart_method(route, method_name, response_type)
+        generate_multipart_objc_method(route, method_name, response_type)
     end
   end
 

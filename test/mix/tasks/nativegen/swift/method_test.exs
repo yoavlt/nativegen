@@ -231,6 +231,10 @@ defmodule Nativegen.Swift.MethodTest do
     run(["post", "/users/:id/register", "registerUser", "Bool", "id:integer", "--multipart", "--group", "v2"])
     assert_receive {:mix_shell, :info, [method]}
     assert method =~ "multipartFormData"
+
+    run(["post", "/users/:id/register", "registerUser", "Bool", "id:integer", "--multipart", "--objc", "--group", "v2"])
+    assert_receive {:mix_shell, :info, [method]}
+    refute method =~ "Future"
   end
 
 end
