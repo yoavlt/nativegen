@@ -15,7 +15,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   """
 
   def run(args) do
-    {opts, args, _} = OptionParser.parse(args, file: :string, objc: :boolean, group: :string)
+    {opts, args, _} = OptionParser.parse(args, file: :string, objc: :boolean, multipart: :boolean, group: :string)
 
     content = generate_content(args, opts)
     case opts[:file] do
@@ -38,12 +38,19 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     if opts[:group] do
       route = "/#{opts[:group]}#{route}"
     end
-    if opts[:objc] do
-      generate_objc_method(
-        http_method, route, method_name, response_type, params
-      )
-    else
-      generate_swift_method(http_method, route, method_name, response_type, params)
+    objc = opts[:objc]
+    multipart = opts[:multipart]
+    case {objc, multipart} do
+      {nil, nil} ->
+        generate_swift_method(http_method, route, method_name, response_type, params)
+      {nil, true} ->
+        generate_multipart_method(route, method_name, response_type)
+      {true, nil} ->
+        generate_objc_method(
+          http_method, route, method_name, response_type, params
+        )
+      {true, true} ->
+        generate_multipart_method(route, method_name, response_type)
     end
   end
 

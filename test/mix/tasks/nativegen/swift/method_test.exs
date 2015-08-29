@@ -220,4 +220,17 @@ defmodule Nativegen.Swift.MethodTest do
     """
   end
 
+  test "run command" do
+    Mix.shell(Mix.Shell.Process)
+    run(["post", "/users/:id/register", "registerUser", "User", "id:integer", "--objc", "--group", "v2"])
+    assert_receive {:mix_shell, :info, [method]}
+    assert method =~ "Please add"
+    assert method =~ "request"
+    assert method =~ "registerUser"
+
+    run(["post", "/users/:id/register", "registerUser", "Bool", "id:integer", "--multipart", "--group", "v2"])
+    assert_receive {:mix_shell, :info, [method]}
+    assert method =~ "multipartFormData"
+  end
+
 end
