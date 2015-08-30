@@ -18,7 +18,7 @@ You can add dependency to your project's `mix.exs`.
 ```:elixir
   defp deps do
     [
-      {:nativegen, "~> 0.2.6"}
+      {:nativegen, "~> 0.2.7"}
     ]
   end
 ```
@@ -45,9 +45,11 @@ import Alamofire
 import SwiftyJSON
 
 public class User : NSObject, JsonModel {
+    var id: Int
     let username: String
     var items: [Item]
     public required init(json: JSON) {
+        id = json["id"].int
         username = json["username"].stringValue
         if json["items"].error == nil {
             items = json["items"].arrayValue.map { Item(json: $0) }
