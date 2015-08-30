@@ -62,7 +62,7 @@ defmodule Nativegen.Swift.MethodTest do
     ["username:string", "registered_at:datetime", "join_date:date"]
     ) == """
         public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate) -> Future<Bool, NSError> {
-            return requestSuccess(.POST, routes: "/users/register", param: ["username": username, "registered_at": toDateTimeObj(registeredAt), "join_date": toDateObj(joinDate)])
+            return requestSuccess(.POST, routes: "/users/register", param: ["username": username, "registered_at": JsonUtil.toDateTimeObj(registeredAt), "join_date": JsonUtil.toDateObj(joinDate)])
         }
     """
   end
@@ -76,7 +76,7 @@ defmodule Nativegen.Swift.MethodTest do
     ["username:string", "registered_at:datetime", "join_date:date"]
     ) == """
         public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate, onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
-            requestSuccess(.POST, routes: "/users/register", param: ["username": username, "registered_at": toDateTimeObj(registeredAt), "join_date": toDateObj(joinDate)])
+            requestSuccess(.POST, routes: "/users/register", param: ["username": username, "registered_at": JsonUtil.toDateTimeObj(registeredAt), "join_date": JsonUtil.toDateObj(joinDate)])
                 .onSuccess { data in onSuccess(data) }
                 .onFailure { error in onError(error) }
         }
@@ -92,7 +92,7 @@ defmodule Nativegen.Swift.MethodTest do
     ["username:string", "registered_at:datetime", "join_date:date"]
     ) == """
         public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate, onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
-            requestSuccess(.POST, routes: "/users/show/\\(id)", param: ["username": username, "registered_at": toDateTimeObj(registeredAt), "join_date": toDateObj(joinDate)])
+            requestSuccess(.POST, routes: "/users/show/\\(id)", param: ["username": username, "registered_at": JsonUtil.toDateTimeObj(registeredAt), "join_date": JsonUtil.toDateObj(joinDate)])
                 .onSuccess { data in onSuccess(data) }
                 .onFailure { error in onError(error) }
         }
@@ -123,6 +123,10 @@ defmodule Nativegen.Swift.MethodTest do
                 items = json["items"].arrayValue.map { Item(json: $0) }
             }
         }
+
+        public func prop() -> [String : AnyObject] {
+            return ["username": username]
+        }
     }
     
     public class UserRepository : Repository {
@@ -152,16 +156,6 @@ defmodule Nativegen.Swift.MethodTest do
     File.rm_rf "test_generate_directory"
 
     assert_raise Mix.Error, fn -> append_file(content, file_name) end
-  end
-
-  test "extract parameter" do
-    assert extract_param("/users/:id/show") == %{"param" => "id"}
-    assert extract_param("/users/:id") == %{"param" => "id"}
-  end
-
-  test "extract parameters" do
-    assert extract_params("/users/:id/show") == ["id"]
-    assert extract_params("/users/:id/show/:hoge") == ["hoge", "id"]
   end
 
   test "replace parmeter in router" do

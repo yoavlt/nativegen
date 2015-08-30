@@ -51,6 +51,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
   protocol JsonModel {
       init(json: JSON)
+      func prop() -> [String : AnyObject]
   }
 
   public class Repository : NSObject {
@@ -320,6 +321,10 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           }
       }
 
+  }
+
+  class JsonUtil {
+
       static func parseDate(year:Int, month:Int, day:Int) -> NSDate {
           var c = NSDateComponents()
           c.year = year
@@ -338,14 +343,14 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return parseDate(year, month: month, day: day)
       }
 
-      public func dateComponent(date: NSDate, component : NSCalendarUnit) -> Int {
+      static func dateComponent(date: NSDate, component : NSCalendarUnit) -> Int {
           let calendar = NSCalendar.currentCalendar()
           let components = calendar.components(component, fromDate: date)
 
           return components.valueForComponent(component)
       }
 
-      func toDateObj(date: NSDate) -> [String: Int] {
+      static func toDateObj(date: NSDate) -> [String: Int] {
           return [
               "year": dateComponent(date, component: .CalendarUnitYear),
               "month": dateComponent(date, component: .CalendarUnitMonth),
@@ -353,7 +358,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           ]
       }
 
-      func toDateTimeObj(date: NSDate) -> [String: Int] {
+      static func toDateTimeObj(date: NSDate) -> [String: Int] {
           var dateObj = toDateObj(date)
           dateObj.updateValue(dateComponent(date, component: .CalendarUnitHour), forKey: "hour")
           dateObj.updateValue(dateComponent(date, component: .CalendarUnitMinute), forKey: "minute")

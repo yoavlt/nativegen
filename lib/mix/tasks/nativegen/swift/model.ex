@@ -65,10 +65,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
     parsed = parse_params(["id:integer"] ++ params)
     json_params = parsed |> build_json_params
     json_parser = parsed |> build_json_parser
+    property    = parsed |> arg_param
     json_model_template(
     singular: singular,
     json_params: json_params,
-    json_parser: json_parser
+    json_parser: json_parser,
+    property: property
     )
   end
 
@@ -117,13 +119,13 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   end
 
   def json_parser(type, "$0") when type in [:datetime, :date],
-  do: "Repository.parseDate(json: $0)"
+  do: "JsonUtil.parseDate(json: $0)"
 
   def json_parser(type, "$0") when is_bitstring(type),
   do: "#{type}(json: $0)"
 
   def json_parser(type, variable) when type in [:datetime, :date],
-  do: "Repository.parseDate(json[\"#{variable}\"])"
+  do: "JsonUtil.parseDate(json[\"#{variable}\"])"
 
   def json_parser(type, var) when is_atom(type) do
     class_name = type |> Atom.to_string |> String.capitalize
@@ -168,6 +170,10 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   <%= @json_params %>
       public required init(json: JSON) {
   <%= @json_parser %>
+      }
+
+      public func prop() -> [String : AnyObject] {
+          return <%= @property %>
       }
   }
   """

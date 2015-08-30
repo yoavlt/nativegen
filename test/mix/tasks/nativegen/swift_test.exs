@@ -24,4 +24,14 @@ defmodule Nativegen.SwiftTest do
     assert args == "id: Int, username: String, age: Int, battleNum: Int, groupId: Int, items: [Item]"
   end
 
+  test "extract parameter" do
+    assert extract_param("/users/:id/show") == %{"param" => "id"}
+    assert extract_param("/users/:id") == %{"param" => "id"}
+  end
+
+  test "extract parameters" do
+    assert extract_params("/users/:id/show") == ["id"]
+    assert extract_params("/users/:id/show/:hoge") == ["hoge", "id"]
+  end
+
 end

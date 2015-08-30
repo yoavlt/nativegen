@@ -63,8 +63,8 @@ defmodule Mix.Tasks.Nativegen.Swift do
       {_, _, _}      -> false
     end)
     |> Enum.map(fn
-      {:date, var, _} -> "\"#{var}\": toDateObj(#{to_camel_case(var)})"
-      {:datetime, var, _} -> "\"#{var}\": toDateTimeObj(#{to_camel_case(var)})"
+      {:date, var, _} -> "\"#{var}\": JsonUtil.toDateObj(#{to_camel_case(var)})"
+      {:datetime, var, _} -> "\"#{var}\": JsonUtil.toDateTimeObj(#{to_camel_case(var)})"
       {atom, var, _} when atom in @default_types -> "\"#{var}\": #{to_camel_case(var)}"
       {_, var, _} -> "\"#{var}_id\": #{to_camel_case(var)}Id"
     end)
@@ -138,5 +138,54 @@ defmodule Mix.Tasks.Nativegen.Swift do
       not (line == "}\n")
     end)
   end
+
+  @doc """
+  Return arguments parameter of request method
+  Example:
+  iex> arg_param(["id:integer", "username:string"], "/users/:id/register", [])
+  "[\"username\": username]"
+  """
+  def arg_param(params, route, opts) do
+    route_params = extract_params(route)
+    params
+    |> parse_params
+    |> Enum.reject(&(is_include?(&1, route_params)))
+    |> generate_params
+    |> wrap_dict(Keyword.get(opts, :key))
+  end
+
+  def arg_param(params, opts \\ []) do
+    params
+    |> generate_params
+    |> wrap_dict(Keyword.get(opts, :key))
+  end
+
+  @doc """
+  Extract parameters from route
+  Example:
+  iex> extract_params("/users/:id/register")
+       ["id"]
+  """
+  def extract_params(method_name, params \\ []) do
+    case extract_param(method_name) do
+      nil -> params
+      %{"param" => param} ->
+        next = String.replace(method_name, ":" <> param, "\\(#{to_camel_case(param)})")
+        extract_params(next, [param | params])
+    end
+  end
+
+  @doc ~S"""
+  extract parameters from route.
+
+  Example:
+  iex> extract_param("/users/:id/show")
+  %{"param" => "id"}
+  """
+  def extract_param(method_name) do
+    Regex.named_captures(~r/:(?<param>.+?)(\/|$)/, method_name)
+  end
+
+  def is_include?({_, var, _}, params), do: var in params
 
 end
