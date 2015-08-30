@@ -16,6 +16,7 @@ defmodule Nativegen.Swift.SetupTest do
   end
 
   test "created directory specified 1st argument and generated swift file" do
+    Mix.shell(Mix.Shell.Process)
     test_directory = Path.join(".", "test_generate_directory/repo")
     if File.exists?(test_directory) do
       File.rm_rf(test_directory)

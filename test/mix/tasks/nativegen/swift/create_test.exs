@@ -11,6 +11,7 @@ defmodule Nativegen.Swift.CreateTest do
   end
 
   test "run" do
+    Mix.shell(Mix.Shell.Process)
     if File.exists?("test_generate_directory") do
       File.rm_rf("test_generate_directory")
     end
@@ -20,6 +21,7 @@ defmodule Nativegen.Swift.CreateTest do
   end
 
   test "run with group" do
+    Mix.shell(Mix.Shell.Process)
     if File.exists?("test_generate_directory") do
       File.rm_rf("test_generate_directory")
     end
