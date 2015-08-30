@@ -113,7 +113,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           Alamofire.request(method, urlStr(routes), parameters: param)
               .responseJSON { (req, res, json, err) in
                   if let statusCode = res?.statusCode {
-                      if statusCode == 204 {
+                      if statusCode == 201 || statusCode == 202 || statusCode == 204 {
                           p.success(true)
                           return
                       }
