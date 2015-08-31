@@ -65,7 +65,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
     parsed = parse_params(["id:integer"] ++ params)
     json_params = parsed |> build_json_params
     json_parser = parsed |> build_json_parser
-    property    = parsed |> arg_param
+    property    = parsed |> arg_prop
     json_model_template(
     singular: singular,
     json_params: json_params,

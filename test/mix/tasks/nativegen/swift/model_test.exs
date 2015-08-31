@@ -57,7 +57,7 @@ defmodule Nativegen.Swift.ModelTest do
         }
 
         public func prop() -> [String : AnyObject] {
-            return ["username": username, "age": age, "first_name": firstName, "last_name": lastName]
+            return ["id": id, "username": username, "age": age, "first_name": firstName, "last_name": lastName]
         }
     }
     """
@@ -85,7 +85,7 @@ defmodule Nativegen.Swift.ModelTest do
         }
 
         public func prop() -> [String : AnyObject] {
-            return ["username": username]
+            return ["id": id, "username": username]
         }
     }
     
@@ -100,7 +100,7 @@ defmodule Nativegen.Swift.ModelTest do
         }
 
         public func prop() -> [String : AnyObject] {
-            return ["name": name, "strength": strength]
+            return ["id": id, "name": name, "strength": strength]
         }
     }
     

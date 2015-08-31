@@ -66,6 +66,16 @@ defmodule Mix.Tasks.Nativegen.Swift do
     |> Enum.join(", ")
   end
 
+  def generate_prop(params) do
+    params
+    |> Enum.reject(fn
+      {:array, _, _} -> true
+      _ -> false
+    end)
+    |> Enum.map(&translate_prop/1)
+    |> Enum.join(", ")
+  end
+
   def translate_prop({:date, var, _}) do
     "\"#{var}\": JsonUtil.toDateObj(#{to_camel_case(var)})"
   end
@@ -165,9 +175,9 @@ defmodule Mix.Tasks.Nativegen.Swift do
     |> wrap_dict(Keyword.get(opts, :key))
   end
 
-  def arg_param(params, opts \\ []) do
+  def arg_prop(params, opts \\ []) do
     params
-    |> generate_params
+    |> generate_prop
     |> wrap_dict(Keyword.get(opts, :key))
   end
 
