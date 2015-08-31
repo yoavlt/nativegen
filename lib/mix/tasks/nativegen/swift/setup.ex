@@ -51,7 +51,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
   protocol JsonModel {
       init(json: JSON)
-      func prop() -> [String : AnyObject?]
+      func prop() -> [String : AnyObject]
   }
 
   public class Repository : NSObject {
