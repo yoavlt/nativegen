@@ -51,7 +51,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
   protocol JsonModel {
       init(json: JSON)
-      func prop() -> [String : AnyObject]
+      func prop() -> [String : AnyObject?]
   }
 
   public class Repository : NSObject {
@@ -246,26 +246,27 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return p.future
       }
 
-      func multipartFormArray<[T] : JsonModel>(routes: String, multipart: Alamofire.MultipartFormData -> ()) -> Future<[T], NSError> {
-          let p = Promise<T, NSError>()
+      func multipartFormArray<T : JsonModel>(routes: String, multipart: Alamofire.MultipartFormData -> ()) -> Future<[T], NSError> {
+          let p = Promise<[T], NSError>()
 
           Alamofire.upload(.POST, URLString: urlStr(routes), multipartFormData: multipart,
               encodingCompletion: { encodingResult in
                   switch encodingResult {
                   case .Success(let upload, _, _):
                       upload.responseJSON { (req, res, json, err) in
-                      if let nserror = err {
-                          p.failure(nserror)
-                      } else {
-                          if let errors = JSON(rawValue:json!)?["errors"] {
-                              p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
-                              return
-                          }
-                          let arrayModel = JSON(json!).array?.map { T(json: $0) }
-                          if arrayModel != nil {
-                              p.success(arrayModel!)
+                          if let nserror = err {
+                              p.failure(nserror)
                           } else {
-                              p.success([])
+                              if let errors = JSON(rawValue:json!)?["errors"] {
+                                  p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
+                                  return
+                              }
+                              let arrayModel = JSON(json!).array?.map { T(json: $0) }
+                              if arrayModel != nil {
+                                  p.success(arrayModel!)
+                              } else {
+                                  p.success([])
+                              }
                           }
                       }
                   case .Failure(let encodingError):
@@ -312,7 +313,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return p.future
       }
 
-      func parseMultipartForm(appendable: NSObject, fileName: String, multipart: Alamofire.MultipartFormData) {
+      func parseMultipartForm(appendable: AnyObject, fileName: String, multipart: Alamofire.MultipartFormData) {
           if let data = appendable as? NSData {
               multipart.appendBodyPart(data: data, name: fileName)
           }

@@ -43,6 +43,17 @@ defmodule Mix.Nativegen do
     end
   end
 
+  def to_upper_camel_case(word) do
+    if word =~ ~r/[A-Z]/ do
+      word
+    else
+      word
+      |> String.split("_")
+      |> Enum.map(&String.capitalize/1)
+      |> Enum.join("")
+    end
+  end
+
   @doc """
   Split last \n line
   """

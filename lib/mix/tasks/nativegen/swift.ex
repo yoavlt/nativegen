@@ -42,7 +42,7 @@ defmodule Mix.Tasks.Nativegen.Swift do
       custom    ->
         custom
         |> Atom.to_string
-        |> String.capitalize
+        |> to_upper_camel_case
     end
   end
 
@@ -175,6 +175,12 @@ defmodule Mix.Tasks.Nativegen.Swift do
     |> wrap_dict(Keyword.get(opts, :key))
   end
 
+  @doc """
+  Return prop method dictionary of JsonModel
+  Example:
+  iex> arg_prop(["id:integer", "username:string"])
+  "[\"id\": id, \"username\": username]"
+  """
   def arg_prop(params, opts \\ []) do
     params
     |> generate_prop

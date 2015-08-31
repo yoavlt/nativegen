@@ -56,7 +56,7 @@ defmodule Nativegen.Swift.ModelTest do
             lastName = json["last_name"].stringValue
         }
 
-        public func prop() -> [String : AnyObject] {
+        public func prop() -> [String : AnyObject?] {
             return ["id": id, "username": username, "age": age, "first_name": firstName, "last_name": lastName]
         }
     }
@@ -84,7 +84,7 @@ defmodule Nativegen.Swift.ModelTest do
             username = json["username"].stringValue
         }
 
-        public func prop() -> [String : AnyObject] {
+        public func prop() -> [String : AnyObject?] {
             return ["id": id, "username": username]
         }
     }
@@ -99,7 +99,7 @@ defmodule Nativegen.Swift.ModelTest do
             strength = json["strength"].floatValue
         }
 
-        public func prop() -> [String : AnyObject] {
+        public func prop() -> [String : AnyObject?] {
             return ["id": id, "name": name, "strength": strength]
         }
     }

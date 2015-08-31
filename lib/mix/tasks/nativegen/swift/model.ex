@@ -128,7 +128,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   do: "JsonUtil.parseDate(json[\"#{variable}\"])"
 
   def json_parser(type, var) when is_atom(type) do
-    class_name = type |> Atom.to_string |> String.capitalize
+    class_name = type |> Atom.to_string |> to_upper_camel_case
     camel_var = to_camel_case(var)
     contents = custom_json_parser_template(var: var, camel_var: camel_var, type: class_name)
     String.slice(contents, 0, String.length(contents)-1)
@@ -172,7 +172,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   <%= @json_parser %>
       }
 
-      public func prop() -> [String : AnyObject] {
+      public func prop() -> [String : AnyObject?] {
           return <%= @property %>
       }
   }

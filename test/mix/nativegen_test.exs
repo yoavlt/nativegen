@@ -9,6 +9,12 @@ defmodule Nativegen.NativegenTest do
     assert to_camel_case("HogeFuga") == "HogeFuga"
   end
 
+  test "to upper camel case" do
+    assert to_upper_camel_case("hoge_fuga_piyo") == "HogeFugaPiyo"
+    assert to_upper_camel_case("hoge") == "Hoge"
+    assert to_upper_camel_case("HogeFuga") == "HogeFuga"
+  end
+
   test "drop last empty" do
     assert drop_last_empty(["hoge", "fuga", ""]) == ["hoge", "fuga"]
     assert drop_last_empty(["hoge", "fuga", ""]) == ["hoge", "fuga"]
