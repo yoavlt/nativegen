@@ -172,7 +172,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
   <%= @json_parser %>
       }
 
-      public func prop() -> [String : AnyObject?] {
+      public func prop() -> [String : AnyObject] {
           return <%= @property %>
       }
   }

@@ -124,8 +124,8 @@ defmodule Nativegen.Swift.MethodTest do
             }
         }
 
-        public func prop() -> [String : AnyObject?] {
-            return ["id": id, "username": username]
+        public func prop() -> [String : AnyObject] {
+            return ["id": id ?? NSNull(), "username": username]
         }
     }
     

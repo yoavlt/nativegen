@@ -62,7 +62,7 @@ defmodule Mix.Tasks.Nativegen.Swift do
       {:array, _, _} -> true
       {_, _, _}      -> false
     end)
-    |> Enum.map(&translate_prop/1)
+    |> Enum.map(&transform_prop/1)
     |> Enum.join(", ")
   end
 
@@ -72,8 +72,16 @@ defmodule Mix.Tasks.Nativegen.Swift do
       {:array, _, _} -> true
       _ -> false
     end)
-    |> Enum.map(&translate_prop/1)
+    |> Enum.map(&transform_prop/1)
     |> Enum.join(", ")
+  end
+
+  def transform_prop({_, var, _} = prop) do
+    if var == "id" or var =~ ~r/Id$/ do
+      translate_prop(prop) <> " ?? NSNull()"
+    else
+      translate_prop(prop)
+    end
   end
 
   def translate_prop({:date, var, _}) do
