@@ -65,6 +65,14 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return NSURL(string:urlStr(routes))!
       }
 
+      func beforeRequest(route: String) {
+          // write your code here
+      }
+
+      func afterRequest(route: String) {
+          // write your code here
+      }
+
       func responseJson<T : JsonModel>(p: Promise<T, NSError>, req: NSURLRequest, res: NSHTTPURLResponse?, json: AnyObject?, err: NSError?) {
           if let nserror = err {
               p.failure(nserror)
@@ -123,8 +131,10 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
       func request<T : JsonModel>(method: Alamofire.Method, routes: String, param: [String:AnyObject]?) -> Future<T, NSError> {
           let p = Promise<T, NSError>()
+          beforeRequest(routes)
           Alamofire.request(method, urlStr(routes), parameters: param)
               .responseJSON { (req, res, json, err) in
+                  self.afterRequest(routes)
                   self.responseJson(p, req: req, res: res, json: json, err: err)
           }
           return p.future
@@ -132,8 +142,10 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
       func requestArray<T : JsonModel>(method: Alamofire.Method, routes: String, param: [String:AnyObject]?) -> Future<[T], NSError> {
           let p = Promise<[T], NSError>()
+          beforeRequest(routes)
           Alamofire.request(method, urlStr(routes), parameters: param)
               .responseJSON { (req, res, json, err) in
+                  self.afterRequest(routes)
                   self.responseJsonArray(p, req: req, res: res, json: json, err: err)
           }
           return p.future
@@ -141,8 +153,10 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
       func requestSuccess(method: Alamofire.Method, routes: String, param: [String: AnyObject]?) -> Future<Bool, NSError> {
           let p = Promise<Bool, NSError>()
+          beforeRequest(routes)
           Alamofire.request(method, urlStr(routes), parameters: param)
               .responseJSON { (req, res, json, err) in
+                  self.afterRequest(routes)
                   self.responseSuccess(p, req: req, res: res, json: json, err: err)
           }
           return p.future
@@ -150,12 +164,14 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
       func uploadStreamFile(stream: NSInputStream, routes: String, f: (Double) -> Void) -> Future<Bool, NSError> {
           let p = Promise<Bool, NSError>()
+          beforeRequest(routes)
           Alamofire.upload(.POST, urlStr(routes), stream: stream)
               .progress { bytesWritten, totalBytesWritten, totalBytesExpectedToWrite in
                   let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
                   f(ratio)
               }
               .responseJSON { req, res, json, err in
+                  self.afterRequest(routes)
                   self.responseSuccess(p, req: req, res: res, json: json, err: err)
               }
           return p.future
@@ -163,6 +179,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
       func uploadFile(url: NSURL, routes: String, f: (Double) -> Void) -> Future<Bool, NSError> {
           let p = Promise<Bool, NSError>()
+          beforeRequest(routes)
           Alamofire.upload(.POST, urlStr(routes), file: url)
               .progress { bytesWritten, totalBytesWritten, totalBytesExpectedToWrite in
                   let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
@@ -177,8 +194,10 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
       func requestData<T : JsonModel>(method: Alamofire.Method, routes: String, param: [String: AnyObject]?) -> Future<T, NSError> {
           let p = Promise<T, NSError>()
+          beforeRequest(routes)
           Alamofire.request(method, urlStr(routes), parameters: param)
               .responseJSON { (req, res, json, err) in
+                  self.afterRequest(routes)
                   if let nserror = err {
                       p.failure(nserror)
                   } else {
@@ -202,10 +221,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
       func multipartFormData<T : JsonModel>(routes: String, multipart: Alamofire.MultipartFormData -> ()) -> Future<T, NSError> {
           let p = Promise<T, NSError>()
 
+          beforeRequest(routes)
           Alamofire.upload(.POST, URLString: urlStr(routes), multipartFormData: multipart,
               encodingCompletion: { encodingResult in
                   switch encodingResult {
                   case .Success(let upload, _, _):
+                      self.afterRequest(routes)
                       upload.responseJSON { (req, res, json, err) in
                           self.responseJson(p, req: req, res: res, json: json, err: err)
                       }
@@ -220,11 +241,13 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
       func multipartFormArray<T : JsonModel>(routes: String, multipart: Alamofire.MultipartFormData -> ()) -> Future<[T], NSError> {
           let p = Promise<[T], NSError>()
 
+          beforeRequest(routes)
           Alamofire.upload(.POST, URLString: urlStr(routes), multipartFormData: multipart,
               encodingCompletion: { encodingResult in
                   switch encodingResult {
                   case .Success(let upload, _, _):
                       upload.responseJSON { (req, res, json, err) in
+                          self.afterRequest(routes)
                           self.responseJsonArray(p, req: req, res: res, json: json, err: err)
                       }
                   case .Failure(let encodingError):
@@ -238,10 +261,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
       func multipartFormDataSuccess(routes: String, multipart: Alamofire.MultipartFormData -> ()) -> Future<Bool, NSError> {
           let p = Promise<Bool, NSError>()
 
+          beforeRequest(routes)
           Alamofire.upload(.POST, URLString: urlStr(routes), multipartFormData: multipart,
               encodingCompletion: { encodingResult in
                   switch encodingResult {
                   case .Success(let upload, _, _):
+                      self.afterRequest(routes)
                       upload.responseJSON { (req, res, json, err) in
                           self.responseSuccess(p, req: req, res: res, json: json, err: err)
                       }
