@@ -114,7 +114,7 @@ defmodule Nativegen.Swift.MethodTest do
     
     public class User : NSObject, JsonModel {
         var id: Int?
-        let username: String
+        var username: String
         var items: [Item]?
         public required init(json: JSON) {
             id = json["id"].int

@@ -86,7 +86,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
 
   def json_param(:integer, "id", type), do: "var id: #{type}?"
   def json_param(_atom, variable, type) when type in @swift_types,
-  do: "let #{variable}: #{type}"
+  do: "var #{variable}: #{type}"
   def json_param(:array, variable, type),
   do: "var #{variable}: #{type}?"
   def json_param(_atom, variable, type) do

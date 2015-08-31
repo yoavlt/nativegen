@@ -9,9 +9,9 @@ defmodule Nativegen.Swift.ModelTest do
     params = Mix.Nativegen.parse_params(@valid_params)
     assert build_json_params(params) <> "\n" == ~S"""
         var id: Int?
-        let username: String
-        let age: Int
-        let battleNum: Int
+        var username: String
+        var age: Int
+        var battleNum: Int
         var groupId: Int?
         var group: Group?
         var items: [Item]?
@@ -44,10 +44,10 @@ defmodule Nativegen.Swift.ModelTest do
     ["username:string", "age:integer", "first_name:string", "last_name:string"]) === """
     public class User : NSObject, JsonModel {
         var id: Int?
-        let username: String
-        let age: Int
-        let firstName: String
-        let lastName: String
+        var username: String
+        var age: Int
+        var firstName: String
+        var lastName: String
         public required init(json: JSON) {
             id = json["id"].int
             username = json["username"].stringValue
@@ -78,7 +78,7 @@ defmodule Nativegen.Swift.ModelTest do
     
     public class User : NSObject, JsonModel {
         var id: Int?
-        let username: String
+        var username: String
         public required init(json: JSON) {
             id = json["id"].int
             username = json["username"].stringValue
@@ -91,8 +91,8 @@ defmodule Nativegen.Swift.ModelTest do
     
     public class Item : NSObject, JsonModel {
         var id: Int?
-        let name: String
-        let strength: Float
+        var name: String
+        var strength: Float
         public required init(json: JSON) {
             id = json["id"].int
             name = json["name"].stringValue
