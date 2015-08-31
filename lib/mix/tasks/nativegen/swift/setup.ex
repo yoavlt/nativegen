@@ -65,24 +65,67 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return NSURL(string:urlStr(routes))!
       }
 
+      func responseJson<T : JsonModel>(p: Promise<T, NSError>, req: NSURLRequest, res: NSHTTPURLResponse?, json: AnyObject?, err: NSError?) {
+          if let nserror = err {
+              p.failure(nserror)
+          } else {
+              if let errors = JSON(rawValue:json!)?["errors"] {
+                  p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
+                  return
+              }
+              if let resJson = JSON(rawValue: json!) {
+                  let model = T(json: resJson)
+                  p.success(model)
+              } else {
+                  p.failure(NSError(domain: "No data property", code: 100, userInfo: nil))
+              }
+          }
+      }
+
+      func responseJsonArray<T : JsonModel>(p: Promise<[T], NSError>, req: NSURLRequest, res: NSHTTPURLResponse?, json: AnyObject?, err: NSError?) {
+          if let nserror = err {
+              p.failure(nserror)
+          } else {
+              if let errors = JSON(rawValue:json!)?["errors"] {
+                  p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
+                  return
+              }
+              let arrayModel = JSON(json!).array?.map { T(json: $0) }
+              if arrayModel != nil {
+                  p.success(arrayModel!)
+              } else {
+                  p.success([])
+              }
+          }
+      }
+
+      func responseSuccess(p: Promise<Bool, NSError>, req: NSURLRequest, res: NSHTTPURLResponse?, json: AnyObject?, err: NSError?) {
+          if let statusCode = res?.statusCode {
+              if statusCode == 201 || statusCode == 202 || statusCode == 204 {
+                  p.success(true)
+                  return
+              }
+          }
+          if let nserror = err {
+              p.failure(nserror)
+          } else {
+              if let errors = JSON(rawValue:json!)?["errors"] {
+                  p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
+                  return
+              }
+              if let success = JSON(json!)["success"].bool {
+                  p.success(success)
+              } else {
+                  p.failure(NSError(domain: "request success error", code: 0, userInfo: nil))
+              }
+          }
+      }
+
       func request<T : JsonModel>(method: Alamofire.Method, routes: String, param: [String:AnyObject]?) -> Future<T, NSError> {
           let p = Promise<T, NSError>()
           Alamofire.request(method, urlStr(routes), parameters: param)
               .responseJSON { (req, res, json, err) in
-                  if let nserror = err {
-                      p.failure(nserror)
-                  } else {
-                      if let errors = JSON(rawValue:json!)?["errors"] {
-                          p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
-                          return
-                      }
-                      if let resJson = JSON(rawValue: json!) {
-                          let model = T(json: resJson)
-                          p.success(model)
-                      } else {
-                          p.failure(NSError(domain: "No data property", code: 100, userInfo: nil))
-                      }
-                  }
+                  self.responseJson(p, req: req, res: res, json: json, err: err)
           }
           return p.future
       }
@@ -91,20 +134,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           let p = Promise<[T], NSError>()
           Alamofire.request(method, urlStr(routes), parameters: param)
               .responseJSON { (req, res, json, err) in
-                  if let nserror = err {
-                      p.failure(nserror)
-                  } else {
-                      if let errors = JSON(rawValue:json!)?["errors"] {
-                          p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
-                          return
-                      }
-                      let arrayModel = JSON(json!).array?.map { T(json: $0) }
-                      if arrayModel != nil {
-                          p.success(arrayModel!)
-                      } else {
-                          p.success([])
-                      }
-                  }
+                  self.responseJsonArray(p, req: req, res: res, json: json, err: err)
           }
           return p.future
       }
@@ -113,25 +143,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           let p = Promise<Bool, NSError>()
           Alamofire.request(method, urlStr(routes), parameters: param)
               .responseJSON { (req, res, json, err) in
-                  if let statusCode = res?.statusCode {
-                      if statusCode == 201 || statusCode == 202 || statusCode == 204 {
-                          p.success(true)
-                          return
-                      }
-                  }
-                  if let nserror = err {
-                      p.failure(nserror)
-                  } else {
-                      if let errors = JSON(rawValue:json!)?["errors"] {
-                          p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
-                          return
-                      }
-                      if let success = JSON(json!)["success"].bool {
-                          p.success(success)
-                      } else {
-                          p.failure(NSError(domain: "request success error", code: 0, userInfo: nil))
-                      }
-                  }
+                  self.responseSuccess(p, req: req, res: res, json: json, err: err)
           }
           return p.future
       }
@@ -143,22 +155,8 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
                   f(ratio)
               }
-              .responseJSON { _, res, json, error in
-                  if let statusCode = res?.statusCode {
-                      if statusCode == 204 {
-                          p.success(true)
-                          return
-                      }
-                  }
-                  if let nserror = error {
-                      p.failure(nserror)
-                  } else {
-                      if let success = JSON(json!)["success"].bool {
-                          p.success(success)
-                      } else {
-                          p.failure(NSError(domain: "request success error", code: 0, userInfo: nil))
-                      }
-                  }
+              .responseJSON { req, res, json, err in
+                  self.responseSuccess(p, req: req, res: res, json: json, err: err)
               }
           return p.future
       }
@@ -170,22 +168,8 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
                   f(ratio)
               }
-              .responseJSON { _, res, json, error in
-                  if let statusCode = res?.statusCode {
-                      if statusCode == 204 {
-                          p.success(true)
-                          return
-                      }
-                  }
-                  if let nserror = error {
-                      p.failure(nserror)
-                  } else {
-                      if let success = JSON(json!)["success"].bool {
-                          p.success(success)
-                      } else {
-                          p.failure(NSError(domain: "request success error", code: 0, userInfo: nil))
-                      }
-                  }
+              .responseJSON { req, res, json, err in
+                  self.responseSuccess(p, req: req, res: res, json: json, err: err)
               }
 
           return p.future
@@ -223,20 +207,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   switch encodingResult {
                   case .Success(let upload, _, _):
                       upload.responseJSON { (req, res, json, err) in
-                          if let nserror = err {
-                              p.failure(nserror)
-                          } else {
-                              if let errors = JSON(rawValue:json!)?["errors"] {
-                                  p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
-                                  return
-                              }
-                              if let resJson = JSON(rawValue: json!) {
-                                  let model = T(json: resJson)
-                                  p.success(model)
-                              } else {
-                                  p.failure(NSError(domain: "No data property", code: 100, userInfo: nil))
-                              }
-                          }
+                          self.responseJson(p, req: req, res: res, json: json, err: err)
                       }
                   case .Failure(let encodingError):
                       p.failure(encodingError)
@@ -254,20 +225,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   switch encodingResult {
                   case .Success(let upload, _, _):
                       upload.responseJSON { (req, res, json, err) in
-                          if let nserror = err {
-                              p.failure(nserror)
-                          } else {
-                              if let errors = JSON(rawValue:json!)?["errors"] {
-                                  p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
-                                  return
-                              }
-                              let arrayModel = JSON(json!).array?.map { T(json: $0) }
-                              if arrayModel != nil {
-                                  p.success(arrayModel!)
-                              } else {
-                                  p.success([])
-                              }
-                          }
+                          self.responseJsonArray(p, req: req, res: res, json: json, err: err)
                       }
                   case .Failure(let encodingError):
                       p.failure(encodingError)
@@ -285,25 +243,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   switch encodingResult {
                   case .Success(let upload, _, _):
                       upload.responseJSON { (req, res, json, err) in
-                          if let statusCode = res?.statusCode {
-                              if statusCode == 204 {
-                                  p.success(true)
-                                  return
-                              }
-                          }
-                          if let nserror = err {
-                              p.failure(nserror)
-                          } else {
-                              if let errors = JSON(rawValue:json!)?["errors"] {
-                                  p.failure(NSError(domain: "server error", code: 101, userInfo: nil))
-                                  return
-                              }
-                              if let success = JSON(json!)["success"].bool {
-                                  p.success(success)
-                              } else {
-                                  p.failure(NSError(domain: "request success error", code: 0, userInfo: nil))
-                              }
-                          }
+                          self.responseSuccess(p, req: req, res: res, json: json, err: err)
                       }
                   case .Failure(let encodingError):
                       p.failure(encodingError)
