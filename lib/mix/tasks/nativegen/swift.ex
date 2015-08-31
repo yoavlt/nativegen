@@ -76,8 +76,8 @@ defmodule Mix.Tasks.Nativegen.Swift do
     |> Enum.join(", ")
   end
 
-  def transform_prop({_, var, _} = prop) do
-    if var == "id" or var =~ ~r/Id$/ do
+  def transform_prop({atom, var, _} = prop) do
+    if var == "id" or not atom in @default_types do
       translate_prop(prop) <> " ?? NSNull()"
     else
       translate_prop(prop)
