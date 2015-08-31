@@ -21,7 +21,7 @@ defmodule Nativegen.SwiftTest do
   test "default args" do
     params = Mix.Nativegen.parse_params(@valid_params)
     args = default_args(params)
-    assert args == "id: Int, username: String, age: Int, battleNum: Int, groupId: Int, items: [Item]"
+    assert args == "id: Int, username: String, age: Int, battleNum: Int, groupId: Int?, items: [Item]"
   end
 
   test "extract parameter" do

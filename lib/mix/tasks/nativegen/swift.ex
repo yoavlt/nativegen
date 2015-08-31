@@ -113,7 +113,7 @@ defmodule Mix.Tasks.Nativegen.Swift do
   def arg(_atom, variable, type) when type in @swift_types,
   do: "#{variable}: #{type}"
   def arg(:array, variable, type), do: "#{variable}: #{type}"
-  def arg(atom, variable, type), do: "#{variable}Id: Int"
+  def arg(atom, variable, type), do: "#{variable}Id: Int?"
 
   def wrap_dict(param_str, nil) do
     case param_str do
