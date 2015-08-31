@@ -62,13 +62,24 @@ defmodule Mix.Tasks.Nativegen.Swift do
       {:array, _, _} -> true
       {_, _, _}      -> false
     end)
-    |> Enum.map(fn
-      {:date, var, _} -> "\"#{var}\": JsonUtil.toDateObj(#{to_camel_case(var)})"
-      {:datetime, var, _} -> "\"#{var}\": JsonUtil.toDateTimeObj(#{to_camel_case(var)})"
-      {atom, var, _} when atom in @default_types -> "\"#{var}\": #{to_camel_case(var)}"
-      {_, var, _} -> "\"#{var}_id\": #{to_camel_case(var)}Id"
-    end)
+    |> Enum.map(&translate_prop/1)
     |> Enum.join(", ")
+  end
+
+  def translate_prop({:date, var, _}) do
+    "\"#{var}\": JsonUtil.toDateObj(#{to_camel_case(var)})"
+  end
+
+  def translate_prop({:datetime, var, _}) do
+    "\"#{var}\": JsonUtil.toDateTimeObj(#{to_camel_case(var)})"
+  end
+
+  def translate_prop({atom, var, _}) when atom in @default_types do
+    "\"#{var}\": #{to_camel_case(var)}"
+  end
+
+  def translate_prop({_, var, _}) do
+    "\"#{var}_id\": #{to_camel_case(var)}Id"
   end
 
   def default_args(params) when is_list(params) do
