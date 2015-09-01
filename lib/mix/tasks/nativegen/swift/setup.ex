@@ -162,7 +162,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return p.future
       }
 
-      func uploadStreamFile(stream: NSInputStream, routes: String, f: (Double) -> Void) -> Future<Bool, NSError> {
+      func uploadStreamFileSuccess(stream: NSInputStream, routes: String, f: (Double) -> Void) -> Future<Bool, NSError> {
           let p = Promise<Bool, NSError>()
           beforeRequest(routes)
           Alamofire.upload(.POST, urlStr(routes), stream: stream)
@@ -177,7 +177,22 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return p.future
       }
 
-      func uploadFile(url: NSURL, routes: String, f: (Double) -> Void) -> Future<Bool, NSError> {
+      func uploadStreamFile<T : JsonModel>(stream: NSInputStream, routes: String, f: (Double) -> Void) -> Future<T, NSError> {
+          let p = Promise<T, NSError>()
+          beforeRequest(routes)
+          Alamofire.upload(.POST, urlStr(routes), stream: stream)
+              .progress { bytesWritten, totalBytesWritten, totalBytesExpectedToWrite in
+                  let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+                  f(ratio)
+              }
+              .responseJSON { req, res, json, err in
+                  self.afterRequest(routes)
+                  self.responseJson(p, req: req, res: res, json: json, err: err)
+              }
+          return p.future
+      }
+
+      func uploadFileSuccess(url: NSURL, routes: String, f: (Double) -> Void) -> Future<Bool, NSError> {
           let p = Promise<Bool, NSError>()
           beforeRequest(routes)
           Alamofire.upload(.POST, urlStr(routes), file: url)
@@ -186,7 +201,24 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
                   f(ratio)
               }
               .responseJSON { req, res, json, err in
+                  self.afterRequest(routes)
                   self.responseSuccess(p, req: req, res: res, json: json, err: err)
+              }
+
+          return p.future
+      }
+
+      func uploadFile<T : JsonModel>(url: NSURL, routes: String, f: (Double) -> Void) -> Future<T, NSError> {
+          let p = Promise<T, NSError>()
+          beforeRequest(routes)
+          Alamofire.upload(.POST, urlStr(routes), file: url)
+              .progress { bytesWritten, totalBytesWritten, totalBytesExpectedToWrite in
+                  let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+                  f(ratio)
+              }
+              .responseJSON { req, res, json, err in
+                  self.afterRequest(routes)
+                  self.responseJson(p, req: req, res: res, json: json, err: err)
               }
 
           return p.future
