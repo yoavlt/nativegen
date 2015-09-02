@@ -38,19 +38,54 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     if opts[:group] do
       route = "/#{opts[:group]}#{route}"
     end
+
     objc = opts[:objc]
-    multipart = opts[:multipart]
-    case {objc, multipart} do
-      {nil, nil} ->
-        generate_swift_method(http_method, route, method_name, response_type, params)
-      {nil, true} ->
-        generate_multipart_method(route, method_name, response_type)
-      {true, nil} ->
-        generate_objc_method(
-          http_method, route, method_name, response_type, params
-        )
-      {true, true} ->
-        generate_multipart_objc_method(route, method_name, response_type)
+
+    case {opts[:multipart], opts[:upload_file], opts[:upload_stream]} do
+      {true, _, _} ->
+        generate_multipart(objc, route, method_name, response_type)
+      {_, true, _} ->
+        generate_upload_file(objc, route, method_name, response_type)
+      {_, _, true} ->
+        generate_upload_stream(objc, route, method_name, response_type)
+      _ ->
+        generate_normal(objc, http_method, route, method_name, response_type, params)
+    end
+  end
+
+  def generate_normal(objc, http_method, route, method_name, response_type, params) do
+    if objc do
+      generate_objc_method(
+      http_method, route, method_name, response_type, params
+      )
+    else
+      generate_swift_method(http_method, route, method_name, response_type, params)
+    end
+  end
+
+  def generate_multipart(objc, route, method_name, response_type) do
+    objc_switch(objc, route, method_name, response_type,
+                &generate_multipart_objc_method/3,
+                &generate_multipart_method/3)
+  end
+
+  def generate_upload_file(objc, route, method_name, response_type) do
+    objc_switch(objc, route, method_name, response_type,
+                &generate_upload_objc_method/3,
+                &generate_upload_method/3)
+  end
+
+  def generate_upload_stream(objc, route, method_name, response_type) do
+    objc_switch(objc, route, method_name, response_type,
+                &generate_upload_stream_objc_method/3,
+                &generate_upload_stream_method/3)
+  end
+
+  def objc_switch(objc, route, method_name, response_type, on_objc, on_swift) do
+    if objc do
+      on_objc.(route, method_name, response_type)
+    else
+      on_swift.(route, method_name, response_type)
     end
   end
 
@@ -132,6 +167,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   Generate multipart form data method which is callable from swift and Objective-C
   """
   def generate_multipart_objc_method(route, method_name, response_type) do
+    IO.inspect route
     arg = extract_params(route) |> Enum.map(fn par ->
       par <> ": Int, "
     end)
@@ -141,6 +177,45 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
       response_type: response_type,
       request_method: multipart_request_method(response_type),
       route: replace_param(route)
+    )
+  end
+
+  def generate_upload_method(route, method_name, response_type) do
+    upload_file_template(
+      method_name: method_name,
+      request_method: upload_request_method(response_type),
+      response_type: response_type,
+      route: route
+    )
+  end
+
+  @doc """
+  Generate upload file method which is callable from swift and Objective-C
+  """
+  def generate_upload_objc_method(route, method_name, response_type) do
+    objc_upload_file_template(
+      method_name: method_name,
+      request_method: upload_request_method(response_type),
+      response_type: response_type,
+      route: route
+    )
+  end
+
+  def generate_upload_stream_method(route, method_name, response_type) do
+    upload_stream_template(
+      method_name: method_name,
+      request_method: upload_stream_method(response_type),
+      response_type: response_type,
+      route: route
+    )
+  end
+
+  def generate_upload_stream_objc_method(route, method_name, response_type) do
+    objc_upload_stream_template(
+      method_name: method_name,
+      request_method: upload_stream_method(response_type),
+      response_type: response_type,
+      route: route
     )
   end
 
@@ -178,6 +253,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
     end
   end
 
+  def upload_request_method("Bool"), do: "uploadFileSuccess"
+  def upload_request_method(_), do: "uploadFile"
+
+  def upload_stream_method("Bool"), do: "uploadStreamFileSuccess"
+  def upload_stream_method(_), do: "uploadStreamFile"
+
   embed_template :method, """
       public func <%= @method_name %>(<%= @arg %>) -> Future<<%= @response_type %>, NSError> {
           return <%= @request_method %>(<%= @http_method %>, routes: "<%= @route %>", param: <%= @param %>)
@@ -206,6 +287,34 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
               }
           }.onSuccess { data in onSuccess(data) }
            .onFailure { err in onError(err) }
+      }
+  """
+
+  embed_template :upload_stream, """
+    public func <%= @method_name %>(stream: NSInputStream, progress: (Double) -> Void) -> Future<<%= @response_type %>, NSError> {
+        return <%= @request_method %>(stream, routes: "<%= @route %>", f: progress)
+    }
+  """
+
+  embed_template :objc_upload_stream, """
+      public func <%= @method_name %>(stream: NSInputStream, progress: (Double) -> Void, onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
+          <%= @request_method %>(stream, routes: "<%= @route %>", f: progress)
+              .onSuccess { data in onSuccess(data) }
+              .onFailure { err in onError(err) }
+      }
+  """
+
+  embed_template :upload_file, """
+    public func <%= @method_name %>(url: NSURL, progress: (Double) -> Void) -> Future<<%= @response_type %>, NSError> {
+        return <%= @request_method %>(url, routes: "<%= @route %>", f: progress)
+    }
+  """
+
+  embed_template :objc_upload_file, """
+      public func <%= @method_name %>(url: NSURL, progress: (Double) -> Void, onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
+          <%= @request_method %>(url, routes: "<%= @route %>", f: progress)
+              .onSuccess { data in onSuccess(data) }
+              .onFailure { err in onError(err) }
       }
   """
 
