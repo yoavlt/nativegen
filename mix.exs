@@ -3,7 +3,7 @@ defmodule Nativegen.Mixfile do
 
   def project do
     [app: :nativegen,
-     version: "0.2.7",
+     version: "0.2.8",
      elixir: "~> 1.0",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,

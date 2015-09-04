@@ -167,7 +167,6 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   Generate multipart form data method which is callable from swift and Objective-C
   """
   def generate_multipart_objc_method(route, method_name, response_type) do
-    IO.inspect route
     arg = extract_params(route) |> Enum.map(fn par ->
       par <> ": Int, "
     end)
