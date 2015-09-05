@@ -15,7 +15,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   """
 
   def run(args) do
-    {opts, args, _} = OptionParser.parse(args, file: :string, objc: :boolean, multipart: :boolean, group: :string)
+    {opts, args, _} = OptionParser.parse(args, file: :string, objc: :boolean, multipart: :boolean, uploadstream: :boolean, upload_file: :boolean, group: :string)
 
     content = generate_content(args, opts)
     case opts[:file] do
@@ -41,7 +41,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
 
     objc = opts[:objc]
 
-    case {opts[:multipart], opts[:upload_file], opts[:upload_stream]} do
+    case {opts[:multipart], opts[:uploadfile], opts[:uploadstream]} do
       {true, _, _} ->
         generate_multipart(objc, route, method_name, response_type)
       {_, true, _} ->

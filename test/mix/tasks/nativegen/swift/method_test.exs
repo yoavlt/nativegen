@@ -237,4 +237,34 @@ defmodule Nativegen.Swift.MethodTest do
     refute method =~ "Future"
   end
 
+  test "run command with upload_file" do
+    Mix.shell(Mix.Shell.Process)
+    run(["post", "/users/:id/upload", "registerUser", "Bool", "id:integer", "--uploadfile", "--group", "v2"])
+    assert_receive {:mix_shell, :info, [method]}
+    assert method =~ "uploadFileSuccess"
+  end
+
+  test "run command with upload_file objc" do
+    Mix.shell(Mix.Shell.Process)
+    run(["post", "/users/:id/upload", "uploadUser", "Bool", "id:integer", "--uploadfile", "--objc", "--group", "v2"])
+    assert_receive {:mix_shell, :info, [method]}
+    assert method =~ "uploadFileSuccess"
+    refute method =~ "Future"
+  end
+
+  test "run command with upload_stream" do
+    Mix.shell(Mix.Shell.Process)
+    run(["post", "/users/:id/upload_stream", "uploadUserStream", "Bool", "id:integer", "--uploadstream", "--group", "v2"])
+    assert_receive {:mix_shell, :info, [method]}
+    assert method =~ "uploadStreamFile"
+  end
+
+  test "run command with upload stream objc" do
+    Mix.shell(Mix.Shell.Process)
+    run(["post", "/users/:id/upload_stream", "uploadUserStream", "Bool", "id:integer", "--uploadstream", "--objc", "--group", "v2"])
+    assert_receive {:mix_shell, :info, [method]}
+    assert method =~ "uploadStreamFile"
+    refute method =~ "Future"
+  end
+
 end
