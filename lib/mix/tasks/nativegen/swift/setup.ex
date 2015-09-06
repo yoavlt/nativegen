@@ -250,7 +250,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return p.future
       }
 
-      func multipartFormData<T : JsonModel>(routes: String, multipart: Alamofire.MultipartFormData -> ()) -> Future<T, NSError> {
+      func multipartFormData<T : JsonModel>(routes: String, progress: (Double) -> (), multipart: Alamofire.MultipartFormData -> ()) -> Future<T, NSError> {
           let p = Promise<T, NSError>()
 
           beforeRequest(routes)
@@ -258,8 +258,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
               encodingCompletion: { encodingResult in
                   switch encodingResult {
                   case .Success(let upload, _, _):
-                      self.afterRequest(routes)
+                      upload.progress { bytesWritten, totalBytesWritten, totalBytesExpectedToWrite in
+                          let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+                          progress(ratio)
+                      }
                       upload.responseJSON { (req, res, json, err) in
+                          self.afterRequest(routes)
                           self.responseJson(p, req: req, res: res, json: json, err: err)
                       }
                   case .Failure(let encodingError):
@@ -270,7 +274,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return p.future
       }
 
-      func multipartFormArray<T : JsonModel>(routes: String, multipart: Alamofire.MultipartFormData -> ()) -> Future<[T], NSError> {
+      func multipartFormArray<T : JsonModel>(routes: String, progress: (Double) -> (), multipart: Alamofire.MultipartFormData -> ()) -> Future<[T], NSError> {
           let p = Promise<[T], NSError>()
 
           beforeRequest(routes)
@@ -278,6 +282,10 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
               encodingCompletion: { encodingResult in
                   switch encodingResult {
                   case .Success(let upload, _, _):
+                      upload.progress { bytesWritten, totalBytesWritten, totalBytesExpectedToWrite in
+                          let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+                          progress(ratio)
+                      }
                       upload.responseJSON { (req, res, json, err) in
                           self.afterRequest(routes)
                           self.responseJsonArray(p, req: req, res: res, json: json, err: err)
@@ -290,7 +298,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return p.future
       }
 
-      func multipartFormDataSuccess(routes: String, multipart: Alamofire.MultipartFormData -> ()) -> Future<Bool, NSError> {
+      func multipartFormDataSuccess(routes: String, progress: (Double) -> (), multipart: Alamofire.MultipartFormData -> ()) -> Future<Bool, NSError> {
           let p = Promise<Bool, NSError>()
 
           beforeRequest(routes)
@@ -298,8 +306,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
               encodingCompletion: { encodingResult in
                   switch encodingResult {
                   case .Success(let upload, _, _):
-                      self.afterRequest(routes)
+                      upload.progress { bytesWritten, totalBytesWritten, totalBytesExpectedToWrite in
+                          let ratio: Double = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+                          progress(ratio)
+                      }
                       upload.responseJSON { (req, res, json, err) in
+                          self.afterRequest(routes)
                           self.responseSuccess(p, req: req, res: res, json: json, err: err)
                       }
                   case .Failure(let encodingError):

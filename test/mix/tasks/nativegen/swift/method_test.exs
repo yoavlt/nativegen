@@ -190,21 +190,21 @@ defmodule Nativegen.Swift.MethodTest do
 
   test "generate multipart method" do
     assert generate_multipart_method("/users/:id/register", "registerUser", "Bool") == """
-        public func registerUser(id: Int, multipart: (Alamofire.MultipartFormData) -> ()) -> Future<Bool, NSError> {
-            return multipartFormDataSuccess(\"/users/\\(id)/register\", multipart: multipart)
+        public func registerUser(id: Int, progress: (Double) -> (), multipart: (Alamofire.MultipartFormData) -> ()) -> Future<Bool, NSError> {
+            return multipartFormDataSuccess(\"/users/\\(id)/register\", progress: progress, multipart: multipart)
         }
     """
     assert generate_multipart_method("/users/:id/register", "registerUser", "User") == """
-        public func registerUser(id: Int, multipart: (Alamofire.MultipartFormData) -> ()) -> Future<User, NSError> {
-            return multipartFormData(\"/users/\\(id)/register\", multipart: multipart)
+        public func registerUser(id: Int, progress: (Double) -> (), multipart: (Alamofire.MultipartFormData) -> ()) -> Future<User, NSError> {
+            return multipartFormData(\"/users/\\(id)/register\", progress: progress, multipart: multipart)
         }
     """
   end
 
   test "generate multipart method which is Objective-C compatible" do
     assert generate_multipart_objc_method("/users/:id/register", "userRegister", "Bool") == """
-        public func userRegister(data: [String : AnyObject], id: Int, onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
-            multipartFormDataSuccess(\"/users/\\(id)/register\") { multipart in
+        public func userRegister(data: [String : AnyObject], id: Int, progress: (Double) -> (), onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
+            multipartFormDataSuccess(\"/users/\\(id)/register\", progress: progress) { multipart in
                 for (fileName, appendable) in data {
                     self.parseMultipartForm(appendable, fileName: fileName, multipart: multipart)
                 }

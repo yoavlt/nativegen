@@ -273,14 +273,14 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   """
 
   embed_template :multipart, """
-      public func <%= @method_name %>(<%= @arg %>multipart: (Alamofire.MultipartFormData) -> ()) -> Future<<%= @response_type %>, NSError> {
-          return <%= @request_method %>("<%= @route %>", multipart: multipart)
+      public func <%= @method_name %>(<%= @arg %>progress: (Double) -> (), multipart: (Alamofire.MultipartFormData) -> ()) -> Future<<%= @response_type %>, NSError> {
+          return <%= @request_method %>("<%= @route %>", progress: progress, multipart: multipart)
       }
   """
 
   embed_template :objc_multipart, """
-      public func <%= @method_name %>(data: [String : AnyObject], <%= @arg %>onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
-          <%= @request_method %>("<%= @route %>") { multipart in
+      public func <%= @method_name %>(data: [String : AnyObject], <%= @arg %>progress: (Double) -> (), onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
+          <%= @request_method %>("<%= @route %>", progress: progress) { multipart in
               for (fileName, appendable) in data {
                   self.parseMultipartForm(appendable, fileName: fileName, multipart: multipart)
               }
