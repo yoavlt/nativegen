@@ -106,19 +106,19 @@ defmodule Nativegen.Swift.ModelTest do
     
     public class UserRepository : Repository {
     
-        public func create(username: String) -> Future<User, NSError> {
+        public func create(username: String) -> Future<User, RepositoryError> {
             return requestData(.POST, routes: "/api/users", param: ["user": ["username": username]])
         }
     
-        public func show(id: Int) -> Future<User, NSError> {
+        public func show(id: Int) -> Future<User, RepositoryError> {
             return requestData(.GET, routes: "/api/users/\\(id)", param: nil)
         }
     
-        public func update(id: Int, username: String) -> Future<User, NSError> {
+        public func update(id: Int, username: String) -> Future<User, RepositoryError> {
             return requestData(.PATCH, routes: "/api/users/\\(id)", param: ["user": ["username": username]])
         }
     
-        public func delete(id: Int) -> Future<Bool, NSError> {
+        public func delete(id: Int) -> Future<Bool, RepositoryError> {
             return requestSuccess(.DELETE, routes: "/api/users/\\(id)", param: nil)
         }
     

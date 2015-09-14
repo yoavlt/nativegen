@@ -35,19 +35,19 @@ defmodule Nativegen.Swift.CreateTest do
     params = ["username:string"]
     default_methods = default_methods(:swift, "User", "users", "api", params, ["id:integer"] ++ params)
     assert default_methods == """
-        public func create(username: String) -> Future<User, NSError> {
+        public func create(username: String) -> Future<User, RepositoryError> {
             return requestData(.POST, routes: "/api/users", param: ["user": ["username": username]])
         }
 
-        public func show(id: Int) -> Future<User, NSError> {
+        public func show(id: Int) -> Future<User, RepositoryError> {
             return requestData(.GET, routes: "/api/users/\\(id)", param: nil)
         }
 
-        public func update(id: Int, username: String) -> Future<User, NSError> {
+        public func update(id: Int, username: String) -> Future<User, RepositoryError> {
             return requestData(.PATCH, routes: "/api/users/\\(id)", param: ["user": ["username": username]])
         }
 
-        public func delete(id: Int) -> Future<Bool, NSError> {
+        public func delete(id: Int) -> Future<Bool, RepositoryError> {
             return requestSuccess(.DELETE, routes: "/api/users/\\(id)", param: nil)
         }
     """
@@ -57,28 +57,28 @@ defmodule Nativegen.Swift.CreateTest do
     params = ["username:string"]
     default_methods = default_methods(:objc_comp, "User", "users", "api", params, ["id:integer"] ++ params)
     assert default_methods == """
-        public func create(username: String, onSuccess: (User) -> (), onError: (NSError) -> ()) {
+        public func create(username: String, onSuccess: (User) -> (), onError: (RepositoryError) -> ()) {
             requestData(.POST, routes: "/api/users", param: ["user": ["username": username]])
                 .onSuccess { data in onSuccess(data) }
-                .onFailure { error in onError(error) }
+                .onFailure { error in onError(error.toError()) }
         }
 
-        public func show(id: Int, onSuccess: (User) -> (), onError: (NSError) -> ()) {
+        public func show(id: Int, onSuccess: (User) -> (), onError: (RepositoryError) -> ()) {
             requestData(.GET, routes: "/api/users/\\(id)", param: nil)
                 .onSuccess { data in onSuccess(data) }
-                .onFailure { error in onError(error) }
+                .onFailure { error in onError(error.toError()) }
         }
 
-        public func update(id: Int, username: String, onSuccess: (User) -> (), onError: (NSError) -> ()) {
+        public func update(id: Int, username: String, onSuccess: (User) -> (), onError: (RepositoryError) -> ()) {
             requestData(.PATCH, routes: "/api/users/\\(id)", param: ["user": ["username": username]])
                 .onSuccess { data in onSuccess(data) }
-                .onFailure { error in onError(error) }
+                .onFailure { error in onError(error.toError()) }
         }
 
-        public func delete(id: Int, onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
+        public func delete(id: Int, onSuccess: (Bool) -> (), onError: (RepositoryError) -> ()) {
             requestSuccess(.DELETE, routes: "/api/users/\\(id)", param: nil)
                 .onSuccess { data in onSuccess(data) }
-                .onFailure { error in onError(error) }
+                .onFailure { error in onError(error.toError()) }
         }
     """
   end

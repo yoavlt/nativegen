@@ -11,7 +11,7 @@ defmodule Nativegen.Swift.MethodTest do
     "User",
     ["username:string", "age:integer"]
     ) == """
-        public func createUser(username: String, age: Int) -> Future<User, NSError> {
+        public func createUser(username: String, age: Int) -> Future<User, RepositoryError> {
             return request(.POST, routes: "/users/create", param: ["username": username, "age": age])
         }
     """
@@ -22,7 +22,7 @@ defmodule Nativegen.Swift.MethodTest do
     "User",
     ["user_id:integer"]
     ) == """
-        public func showUser(userId: Int) -> Future<User, NSError> {
+        public func showUser(userId: Int) -> Future<User, RepositoryError> {
             return request(.POST, routes: "/users/\\(userId)/show", param: nil)
         }
     """
@@ -33,7 +33,7 @@ defmodule Nativegen.Swift.MethodTest do
     "[Message]",
     ["user_id:integer"]
     ) == """
-        public func fetchMessages(userId: Int) -> Future<[Message], NSError> {
+        public func fetchMessages(userId: Int) -> Future<[Message], RepositoryError> {
             return requestArray(.POST, routes: "/users/\\(userId)/messages", param: nil)
         }
     """
@@ -47,7 +47,7 @@ defmodule Nativegen.Swift.MethodTest do
     "Bool",
     ["id:integer"]
     ) == """
-        public func deleteUser(id: Int) -> Future<Bool, NSError> {
+        public func deleteUser(id: Int) -> Future<Bool, RepositoryError> {
             return requestSuccess(.DELETE, routes: "/users/delete", param: nil)
         }
     """
@@ -61,7 +61,7 @@ defmodule Nativegen.Swift.MethodTest do
     "Bool",
     ["username:string", "registered_at:datetime", "join_date:date"]
     ) == """
-        public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate) -> Future<Bool, NSError> {
+        public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate) -> Future<Bool, RepositoryError> {
             return requestSuccess(.POST, routes: "/users/register", param: ["username": username, "registered_at": JsonUtil.toDateTimeObj(registeredAt), "join_date": JsonUtil.toDateObj(joinDate)])
         }
     """
@@ -75,10 +75,10 @@ defmodule Nativegen.Swift.MethodTest do
     "Bool",
     ["username:string", "registered_at:datetime", "join_date:date"]
     ) == """
-        public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate, onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
+        public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate, onSuccess: (Bool) -> (), onError: (RepositoryError) -> ()) {
             requestSuccess(.POST, routes: "/users/register", param: ["username": username, "registered_at": JsonUtil.toDateTimeObj(registeredAt), "join_date": JsonUtil.toDateObj(joinDate)])
                 .onSuccess { data in onSuccess(data) }
-                .onFailure { error in onError(error) }
+                .onFailure { error in onError(error.toError()) }
         }
     """
   end
@@ -91,10 +91,10 @@ defmodule Nativegen.Swift.MethodTest do
     "Bool",
     ["username:string", "registered_at:datetime", "join_date:date"]
     ) == """
-        public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate, onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
+        public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate, onSuccess: (Bool) -> (), onError: (RepositoryError) -> ()) {
             requestSuccess(.POST, routes: "/users/show/\\(id)", param: ["username": username, "registered_at": JsonUtil.toDateTimeObj(registeredAt), "join_date": JsonUtil.toDateObj(joinDate)])
                 .onSuccess { data in onSuccess(data) }
-                .onFailure { error in onError(error) }
+                .onFailure { error in onError(error.toError()) }
         }
     """
   end
@@ -131,23 +131,23 @@ defmodule Nativegen.Swift.MethodTest do
     
     public class UserRepository : Repository {
     
-        public func create(username: String) -> Future<User, NSError> {
+        public func create(username: String) -> Future<User, RepositoryError> {
             return requestData(.POST, routes: "/api/users", param: ["user": ["username": username]])
         }
     
-        public func show(id: Int) -> Future<User, NSError> {
+        public func show(id: Int) -> Future<User, RepositoryError> {
             return requestData(.GET, routes: "/api/users/\\(id)", param: nil)
         }
     
-        public func update(id: Int, username: String, items: [Item]) -> Future<User, NSError> {
+        public func update(id: Int, username: String, items: [Item]) -> Future<User, RepositoryError> {
             return requestData(.PATCH, routes: "/api/users/\\(id)", param: ["user": ["username": username]])
         }
     
-        public func delete(id: Int) -> Future<Bool, NSError> {
+        public func delete(id: Int) -> Future<Bool, RepositoryError> {
             return requestSuccess(.DELETE, routes: "/api/users/\\(id)", param: nil)
         }
     
-        public func buyItem(itemId: Int) -> Future<Bool, NSError> {
+        public func buyItem(itemId: Int) -> Future<Bool, RepositoryError> {
             return requestSuccess(.POST, routes: "/users/buy", param: ["item_id": itemId])
         }
     
@@ -190,12 +190,12 @@ defmodule Nativegen.Swift.MethodTest do
 
   test "generate multipart method" do
     assert generate_multipart_method("/users/:id/register", "registerUser", "Bool") == """
-        public func registerUser(id: Int, progress: (Double) -> (), multipart: (Alamofire.MultipartFormData) -> ()) -> Future<Bool, NSError> {
+        public func registerUser(id: Int, progress: (Double) -> (), multipart: (Alamofire.MultipartFormData) -> ()) -> Future<Bool, RepositoryError> {
             return multipartFormDataSuccess(\"/users/\\(id)/register\", progress: progress, multipart: multipart)
         }
     """
     assert generate_multipart_method("/users/:id/register", "registerUser", "User") == """
-        public func registerUser(id: Int, progress: (Double) -> (), multipart: (Alamofire.MultipartFormData) -> ()) -> Future<User, NSError> {
+        public func registerUser(id: Int, progress: (Double) -> (), multipart: (Alamofire.MultipartFormData) -> ()) -> Future<User, RepositoryError> {
             return multipartFormData(\"/users/\\(id)/register\", progress: progress, multipart: multipart)
         }
     """
@@ -203,13 +203,13 @@ defmodule Nativegen.Swift.MethodTest do
 
   test "generate multipart method which is Objective-C compatible" do
     assert generate_multipart_objc_method("/users/:id/register", "userRegister", "Bool") == """
-        public func userRegister(data: [String : AnyObject], id: Int, progress: (Double) -> (), onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
+        public func userRegister(data: [String : AnyObject], id: Int, progress: (Double) -> (), onSuccess: (Bool) -> (), onError: (RepositoryError) -> ()) {
             multipartFormDataSuccess(\"/users/\\(id)/register\", progress: progress) { multipart in
                 for (fileName, appendable) in data {
                     self.parseMultipartForm(appendable, fileName: fileName, multipart: multipart)
                 }
             }.onSuccess { data in onSuccess(data) }
-             .onFailure { err in onError(err) }
+             .onFailure { err in onError(err.toError()) }
         }
     """
   end

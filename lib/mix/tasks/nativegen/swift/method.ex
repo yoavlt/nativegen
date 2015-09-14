@@ -259,38 +259,38 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   def upload_stream_method(_), do: "uploadStreamFile"
 
   embed_template :method, """
-      public func <%= @method_name %>(<%= @arg %>) -> Future<<%= @response_type %>, NSError> {
+      public func <%= @method_name %>(<%= @arg %>) -> Future<<%= @response_type %>, RepositoryError> {
           return <%= @request_method %>(<%= @http_method %>, routes: "<%= @route %>", param: <%= @param %>)
       }
   """
 
   embed_template :objc_method, """
-      public func <%= @method_name %>(<%= @arg %>, onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
+      public func <%= @method_name %>(<%= @arg %>, onSuccess: (<%= @response_type %>) -> (), onError: (RepositoryError) -> ()) {
           <%= @request_method %>(<%= @http_method %>, routes: "<%= @route %>", param: <%= @param %>)
               .onSuccess { data in onSuccess(data) }
-              .onFailure { error in onError(error) }
+              .onFailure { error in onError(error.toError()) }
       }
   """
 
   embed_template :multipart, """
-      public func <%= @method_name %>(<%= @arg %>progress: (Double) -> (), multipart: (Alamofire.MultipartFormData) -> ()) -> Future<<%= @response_type %>, NSError> {
+      public func <%= @method_name %>(<%= @arg %>progress: (Double) -> (), multipart: (Alamofire.MultipartFormData) -> ()) -> Future<<%= @response_type %>, RepositoryError> {
           return <%= @request_method %>("<%= @route %>", progress: progress, multipart: multipart)
       }
   """
 
   embed_template :objc_multipart, """
-      public func <%= @method_name %>(data: [String : AnyObject], <%= @arg %>progress: (Double) -> (), onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
+      public func <%= @method_name %>(data: [String : AnyObject], <%= @arg %>progress: (Double) -> (), onSuccess: (<%= @response_type %>) -> (), onError: (RepositoryError) -> ()) {
           <%= @request_method %>("<%= @route %>", progress: progress) { multipart in
               for (fileName, appendable) in data {
                   self.parseMultipartForm(appendable, fileName: fileName, multipart: multipart)
               }
           }.onSuccess { data in onSuccess(data) }
-           .onFailure { err in onError(err) }
+           .onFailure { err in onError(err.toError()) }
       }
   """
 
   embed_template :upload_stream, """
-    public func <%= @method_name %>(stream: NSInputStream, progress: (Double) -> Void) -> Future<<%= @response_type %>, NSError> {
+    public func <%= @method_name %>(stream: NSInputStream, progress: (Double) -> Void) -> Future<<%= @response_type %>, RepositoryError> {
         return <%= @request_method %>(stream, routes: "<%= @route %>", f: progress)
     }
   """
@@ -299,12 +299,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
       public func <%= @method_name %>(stream: NSInputStream, progress: (Double) -> Void, onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
           <%= @request_method %>(stream, routes: "<%= @route %>", f: progress)
               .onSuccess { data in onSuccess(data) }
-              .onFailure { err in onError(err) }
+              .onFailure { err in onError(err.toError()) }
       }
   """
 
   embed_template :upload_file, """
-    public func <%= @method_name %>(url: NSURL, progress: (Double) -> Void) -> Future<<%= @response_type %>, NSError> {
+    public func <%= @method_name %>(url: NSURL, progress: (Double) -> Void) -> Future<<%= @response_type %>, RepositoryError> {
         return <%= @request_method %>(url, routes: "<%= @route %>", f: progress)
     }
   """
@@ -313,7 +313,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
       public func <%= @method_name %>(url: NSURL, progress: (Double) -> Void, onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
           <%= @request_method %>(url, routes: "<%= @route %>", f: progress)
               .onSuccess { data in onSuccess(data) }
-              .onFailure { err in onError(err) }
+              .onFailure { err in onError(err.toError()) }
       }
   """
 
