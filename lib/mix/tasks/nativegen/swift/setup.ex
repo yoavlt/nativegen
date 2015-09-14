@@ -346,10 +346,34 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return date!
       }
 
+      static func parseDateTime(year:Int, month:Int, day:Int, hour:Int, min:Int, sec:Int) -> NSDate {
+          var c = NSDateComponents()
+          c.year = year
+          c.month = month
+          c.day = day
+          c.hour = hour
+          c.minute = min
+          c.second = sec
+
+          var gregorian = NSCalendar(identifier:NSCalendarIdentifierGregorian)
+          var date = gregorian!.dateFromComponents(c)
+          return date!
+      }
+
       static func parseDate(json: JSON) -> NSDate {
           let year = json["year"].intValue
           let month = json["month"].intValue
           let day = json["day"].intValue
+          return parseDate(year, month: month, day: day)
+      }
+
+      static func parseDateTime(json: JSON) -> NSDate {
+          let year = json["year"].intValue
+          let month = json["month"].intValue
+          let day = json["day"].intValue
+          let hour = json["hour"].intValue
+          let min = json["min"].intValue
+          let sec = json["sec"].intValue
           return parseDate(year, month: month, day: day)
       }
 
@@ -371,8 +395,8 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
       static func toDateTimeObj(date: NSDate) -> [String: Int] {
           var dateObj = toDateObj(date)
           dateObj.updateValue(dateComponent(date, component: .CalendarUnitHour), forKey: "hour")
-          dateObj.updateValue(dateComponent(date, component: .CalendarUnitMinute), forKey: "minute")
-          dateObj.updateValue(dateComponent(date, component: .CalendarUnitSecond), forKey: "second")
+          dateObj.updateValue(dateComponent(date, component: .CalendarUnitMinute), forKey: "min")
+          dateObj.updateValue(dateComponent(date, component: .CalendarUnitSecond), forKey: "sec")
           return dateObj
       }
 
