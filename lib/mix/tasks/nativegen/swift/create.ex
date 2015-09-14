@@ -52,9 +52,9 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
   def default_methods(:swift, singular, plural, group, params, id_params) do
     alias Mix.Tasks.Nativegen.Swift.Method
     opts = [method: "Data", key: String.downcase(singular)] 
-    create_method = Method.generate_swift_method("post", "/#{group}/#{plural}", "create", "User", build_create_args(params), opts)
-    show_method   = Method.generate_swift_method("get", "/#{group}/#{plural}/\\(id)", "show", "User", ["id:integer"], opts)
-    update_method = Method.generate_swift_method("patch", "/#{group}/#{plural}/\\(id)", "update", "User", id_params, opts)
+    create_method = Method.generate_swift_method("post", "/#{group}/#{plural}", "create", singular, build_create_args(params), opts)
+    show_method   = Method.generate_swift_method("get", "/#{group}/#{plural}/\\(id)", "show", singular, ["id:integer"], opts)
+    update_method = Method.generate_swift_method("patch", "/#{group}/#{plural}/\\(id)", "update", singular, id_params, opts)
     delete_method = Method.generate_swift_method("delete", "/#{group}/#{plural}/\\(id)", "delete", "Bool", ["id:integer"])
     [create_method, show_method, update_method, delete_method] |> Enum.join("\n")
   end

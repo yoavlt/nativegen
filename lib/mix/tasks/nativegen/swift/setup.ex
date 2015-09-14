@@ -49,12 +49,12 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
   import Alamofire
   import SwiftyJSON
 
-  protocol JsonModel {
+  public protocol JsonModel {
       init(json: JSON)
       func prop() -> [String : AnyObject]
   }
 
-  enum RepositoryError : ErrorType {
+  public enum RepositoryError : ErrorType {
       case RemoteServerError(String)
       case AlamofireError(ErrorType)
 
