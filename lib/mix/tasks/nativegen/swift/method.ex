@@ -265,7 +265,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   """
 
   embed_template :objc_method, """
-      public func <%= @method_name %>(<%= @arg %>, onSuccess: (<%= @response_type %>) -> (), onError: (RepositoryError) -> ()) {
+      public func <%= @method_name %>(<%= @arg %>, onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
           <%= @request_method %>(<%= @http_method %>, routes: "<%= @route %>", param: <%= @param %>)
               .onSuccess { data in onSuccess(data) }
               .onFailure { error in onError(error.toError()) }
@@ -279,7 +279,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Method do
   """
 
   embed_template :objc_multipart, """
-      public func <%= @method_name %>(data: [String : AnyObject], <%= @arg %>progress: (Double) -> (), onSuccess: (<%= @response_type %>) -> (), onError: (RepositoryError) -> ()) {
+      public func <%= @method_name %>(data: [String : AnyObject], <%= @arg %>progress: (Double) -> (), onSuccess: (<%= @response_type %>) -> (), onError: (NSError) -> ()) {
           <%= @request_method %>("<%= @route %>", progress: progress) { multipart in
               for (fileName, appendable) in data {
                   self.parseMultipartForm(appendable, fileName: fileName, multipart: multipart)

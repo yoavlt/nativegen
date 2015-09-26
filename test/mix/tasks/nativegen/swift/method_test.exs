@@ -75,7 +75,7 @@ defmodule Nativegen.Swift.MethodTest do
     "Bool",
     ["username:string", "registered_at:datetime", "join_date:date"]
     ) == """
-        public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate, onSuccess: (Bool) -> (), onError: (RepositoryError) -> ()) {
+        public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate, onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
             requestSuccess(.POST, routes: "/users/register", param: ["username": username, "registered_at": JsonUtil.toDateTimeObj(registeredAt), "join_date": JsonUtil.toDateObj(joinDate)])
                 .onSuccess { data in onSuccess(data) }
                 .onFailure { error in onError(error.toError()) }
@@ -91,7 +91,7 @@ defmodule Nativegen.Swift.MethodTest do
     "Bool",
     ["username:string", "registered_at:datetime", "join_date:date"]
     ) == """
-        public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate, onSuccess: (Bool) -> (), onError: (RepositoryError) -> ()) {
+        public func registerUser(username: String, registeredAt: NSDate, joinDate: NSDate, onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
             requestSuccess(.POST, routes: "/users/show/\\(id)", param: ["username": username, "registered_at": JsonUtil.toDateTimeObj(registeredAt), "join_date": JsonUtil.toDateObj(joinDate)])
                 .onSuccess { data in onSuccess(data) }
                 .onFailure { error in onError(error.toError()) }
@@ -203,7 +203,7 @@ defmodule Nativegen.Swift.MethodTest do
 
   test "generate multipart method which is Objective-C compatible" do
     assert generate_multipart_objc_method("/users/:id/register", "userRegister", "Bool") == """
-        public func userRegister(data: [String : AnyObject], id: Int, progress: (Double) -> (), onSuccess: (Bool) -> (), onError: (RepositoryError) -> ()) {
+        public func userRegister(data: [String : AnyObject], id: Int, progress: (Double) -> (), onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
             multipartFormDataSuccess(\"/users/\\(id)/register\", progress: progress) { multipart in
                 for (fileName, appendable) in data {
                     self.parseMultipartForm(appendable, fileName: fileName, multipart: multipart)

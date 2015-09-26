@@ -57,25 +57,25 @@ defmodule Nativegen.Swift.CreateTest do
     params = ["username:string"]
     default_methods = default_methods(:objc_comp, "User", "users", "api", params, ["id:integer"] ++ params)
     assert default_methods == """
-        public func create(username: String, onSuccess: (User) -> (), onError: (RepositoryError) -> ()) {
+        public func create(username: String, onSuccess: (User) -> (), onError: (NSError) -> ()) {
             requestData(.POST, routes: "/api/users", param: ["user": ["username": username]])
                 .onSuccess { data in onSuccess(data) }
                 .onFailure { error in onError(error.toError()) }
         }
 
-        public func show(id: Int, onSuccess: (User) -> (), onError: (RepositoryError) -> ()) {
+        public func show(id: Int, onSuccess: (User) -> (), onError: (NSError) -> ()) {
             requestData(.GET, routes: "/api/users/\\(id)", param: nil)
                 .onSuccess { data in onSuccess(data) }
                 .onFailure { error in onError(error.toError()) }
         }
 
-        public func update(id: Int, username: String, onSuccess: (User) -> (), onError: (RepositoryError) -> ()) {
+        public func update(id: Int, username: String, onSuccess: (User) -> (), onError: (NSError) -> ()) {
             requestData(.PATCH, routes: "/api/users/\\(id)", param: ["user": ["username": username]])
                 .onSuccess { data in onSuccess(data) }
                 .onFailure { error in onError(error.toError()) }
         }
 
-        public func delete(id: Int, onSuccess: (Bool) -> (), onError: (RepositoryError) -> ()) {
+        public func delete(id: Int, onSuccess: (Bool) -> (), onError: (NSError) -> ()) {
             requestSuccess(.DELETE, routes: "/api/users/\\(id)", param: nil)
                 .onSuccess { data in onSuccess(data) }
                 .onFailure { error in onError(error.toError()) }
