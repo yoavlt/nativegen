@@ -342,9 +342,11 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           return p.future
       }
 
-      func parseMultipartForm(appendable: AnyObject, fileName: String, multipart: Alamofire.MultipartFormData) {
+      func parseMultipartForm(appendable: AnyObject, fileName: String, multipart: Alamofire.MultipartFormData, mimeType: String = "image/jpg") {
           if let data = appendable as? NSData {
-              multipart.appendBodyPart(data: data, name: fileName)
+              let ext = JsonUtil.mimeToExt(mimeType)
+              let file = "\(fileName).\(ext)"
+              multipart.appendBodyPart(data: data, name: fileName, fileName: file, mimeType: mimeType)
           }
           if let url = appendable as? NSURL {
               multipart.appendBodyPart(fileURL: url, name: fileName)
@@ -418,6 +420,10 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
           dateObj.updateValue(dateComponent(date, component: .Minute), forKey: "min")
           dateObj.updateValue(dateComponent(date, component: .Second), forKey: "sec")
           return dateObj
+      }
+
+      static func mimeToExt(mime: String) -> String {
+          return mime.componentsSeparatedByString("/")[1]
       }
 
   }
