@@ -28,7 +28,7 @@ defmodule Nativegen.Mixfile do
   end
 
   defp package do
-    [contributors: ["Takuma Yoshida"],
+    [maintainers: ["Takuma Yoshida"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/yoavlt/nativegen"},
     ]
