@@ -24,7 +24,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
     [path, singular, plural | params] = args
 
     id_params = ["id:integer"] ++ params
-              |> Enum.uniq
+                |> Enum.uniq
     parsed = parse_params(id_params)
 
     group = opts[:group] || "api"
@@ -62,9 +62,9 @@ defmodule Mix.Tasks.Nativegen.Swift.Create do
   def default_methods(:objc_comp, singular, plural, group, params, id_params) do
     alias Mix.Tasks.Nativegen.Swift.Method
     opts = [method: "Data", key: String.downcase(singular)] 
-    create_method = Method.generate_objc_method("post", "/#{group}/#{plural}", "create", "User", build_create_args(params), opts)
-    show_method   = Method.generate_objc_method("get", "/#{group}/#{plural}/\\(id)", "show", "User", ["id:integer"], opts)
-    update_method = Method.generate_objc_method("patch", "/#{group}/#{plural}/\\(id)", "update", "User", id_params, opts)
+    create_method = Method.generate_objc_method("post", "/#{group}/#{plural}", "create", singular, build_create_args(params), opts)
+    show_method   = Method.generate_objc_method("get", "/#{group}/#{plural}/\\(id)", "show", singular, ["id:integer"], opts)
+    update_method = Method.generate_objc_method("patch", "/#{group}/#{plural}/\\(id)", "update", singular, id_params, opts)
     delete_method = Method.generate_objc_method("delete", "/#{group}/#{plural}/\\(id)", "delete", "Bool", ["id:integer"])
     [create_method, show_method, update_method, delete_method] |> Enum.join("\n")
   end
