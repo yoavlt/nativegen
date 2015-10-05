@@ -71,7 +71,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
   extension JSON {
       var hasKey: Bool {
           get {
-              return self.object.isKindOfClass(NSNull) == false
+              return self.error == nil
           }
       }
   }
@@ -97,6 +97,8 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
       func responseJson<T: JsonModel>(p: Promise<T, RepositoryError>, req: NSURLRequest?, res: NSHTTPURLResponse?, result: Result<AnyObject>) {
           switch result {
+          case .Success(let msg) where msg is String:
+              p.tryFailure(.RemoteServerError("\(msg)"))
           case .Success(let obj):
               let json = JSON(obj)
               let jsonError = json["errors"]
@@ -113,6 +115,8 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
       func responseJsonData<T: JsonModel>(p: Promise<T, RepositoryError>, req: NSURLRequest?, res: NSHTTPURLResponse?, result: Result<AnyObject>) {
           switch result {
+          case .Success(let msg) where msg is String:
+              p.tryFailure(.RemoteServerError("\(msg)"))
           case .Success(let obj):
               let json = JSON(obj)
               let jsonError = json["errors"]
@@ -129,6 +133,8 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
 
       func responseJsonArray<T : JsonModel>(p: Promise<[T], RepositoryError>, req: NSURLRequest?, res: NSHTTPURLResponse?, result: Result<AnyObject>) {
           switch result {
+          case .Success(let msg) where msg is String:
+              p.tryFailure(.RemoteServerError("\(msg)"))
           case .Success(let obj):
               let json = JSON(obj)
               let jsonError = json["errors"]
@@ -151,6 +157,8 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
               }
           }
           switch result {
+          case .Success(let msg) where msg is String:
+              p.tryFailure(.RemoteServerError("\(msg)"))
           case .Success(let obj):
               let json = JSON(obj)
               let jsonError = json["errors"]
