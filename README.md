@@ -18,7 +18,7 @@ You can add dependency to your project's `mix.exs`.
 ```:elixir
   defp deps do
     [
-      {:nativegen, "~> 0.3.0"}
+      {:nativegen, "~> 0.3.1"}
     ]
   end
 ```
@@ -26,7 +26,7 @@ You can add dependency to your project's `mix.exs`.
 then,
 
 ```:sh
-$ mix do deps.get, mix compile
+$ mix do deps.get, compile
 ```
 
 ## iOS
