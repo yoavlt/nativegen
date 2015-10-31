@@ -118,8 +118,9 @@ defmodule Mix.Tasks.Nativegen.Swift.Model do
     "$0.#{json_parse_method(swift_type)}"
   end
 
-  def json_parser(type, "$0") when type in [:datetime, :date],
-  do: "JsonUtil.parseDate(json: $0)"
+  def json_parser(:date, "$0"), do: "JsonUtil.parseDate(json: $0)"
+
+  def json_parser(:datetime, "$0"), do: "JsonUtil.parseDate(json: $0)"
 
   def json_parser(type, "$0") when is_bitstring(type),
   do: "#{type}(json: $0)"
