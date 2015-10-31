@@ -391,20 +391,16 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
       }
 
       static func parseDate(json: JSON) -> NSDate {
-          let year = json["year"].intValue
-          let month = json["month"].intValue
-          let day = json["day"].intValue
-          return parseDate(year, month: month, day: day)
+          let inputFormat = NSDateFormatter()
+          inputFormat.dateFormat = "yyyy-MM-dd"
+          return inputFormat.dateFromString(json.stringValue)!
       }
 
       static func parseDateTime(json: JSON) -> NSDate {
-          let year = json["year"].intValue
-          let month = json["month"].intValue
-          let day = json["day"].intValue
-          let hour = json["hour"].intValue
-          let min = json["min"].intValue
-          let sec = json["sec"].intValue
-          return parseDateTime(year, month: month, day: day, hour: hour, min: min, sec: sec)
+          let inputFormat = NSDateFormatter()
+          inputFormat.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+          let dateString = json.stringValue
+          return inputFormat.dateFromString(dateString)!
       }
 
       static func dateComponent(date: NSDate, component : NSCalendarUnit) -> Int {
