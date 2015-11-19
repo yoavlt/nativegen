@@ -43,7 +43,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
     repository_template(host: host)
   end
 
-  embed_template :repository, """
+  embed_template :repository, ~S"""
   import Foundation
   import BrightFutures
   import Alamofire
@@ -104,7 +104,7 @@ defmodule Mix.Tasks.Nativegen.Swift.Setup do
               let json = JSON(obj)
               let jsonError = json["errors"]
               if jsonError.hasKey {
-                  p.tryFailure(.RemoteServerError("(jsonError.object)"))
+                  p.tryFailure(.RemoteServerError("\(jsonError.object)"))
                   return
               }
               let model = T(json: json)
